@@ -6,9 +6,11 @@ using UnityEngine;
 public class Character : ScriptableObject
 {
     public Sprite sprite;
-    public int LVL = 80;
+    public int LVL = 1;
+    public int Ascension = 0;
     public BaseStats baseStats;
     public AdvancedStats advancedStats;
+    public int Rarity = 4;
 
     
 }

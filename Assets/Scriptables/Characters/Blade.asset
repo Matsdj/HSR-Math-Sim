@@ -10,20 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be8d09e4d83fc12498ed6f45b5865ed7, type: 3}
-  m_Name: Bailu
+  m_Name: Blade
   m_EditorClassIdentifier: 
-  LVL: 80
+  sprite: {fileID: 21300000, guid: 33a725b8f2f2ef647bd325e28b542a38, type: 3}
+  LVL: 1
+  Ascension: 0
   baseStats:
-    HP: 1319
-    ATK: 562
-    DEF: 485
-    SPD: 98
+    HP: 184.8
+    ATK: 73.92
+    DEF: 66
+    SPD: 97
   advancedStats:
-    CRIT_Rate: 0
-    CRIT_DMG: 0
+    CRIT_Rate: 5
+    CRIT_DMG: 50
     BreakEffect: 0
     OutgoingHealingBoost: 0
-    MaxEnergy: 100
+    MaxEnergy: 130
     EnergyRegenerationRate: 0
     EffectHitRate: 0
     EffectRES: 0
+    Aggro: 125
+  Rarity: 5

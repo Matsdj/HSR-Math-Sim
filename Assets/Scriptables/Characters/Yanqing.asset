@@ -10,21 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be8d09e4d83fc12498ed6f45b5865ed7, type: 3}
-  m_Name: Argenti
+  m_Name: Yanqing
   m_EditorClassIdentifier: 
-  sprite: {fileID: 21300000, guid: 32c09ea187be50c43ac2cf4b17ec185c, type: 3}
-  LVL: 80
+  sprite: {fileID: 21300000, guid: 124bba5cf14852e49862f3a59f48c4a9, type: 3}
+  LVL: 1
+  Ascension: 0
   baseStats:
-    HP: 1047
-    ATK: 737
-    DEF: 363
-    SPD: 103
+    HP: 121.44
+    ATK: 92.4
+    DEF: 56.1
+    SPD: 109
   advancedStats:
-    CRIT_Rate: 0
-    CRIT_DMG: 0
+    CRIT_Rate: 5
+    CRIT_DMG: 50
     BreakEffect: 0
     OutgoingHealingBoost: 0
-    MaxEnergy: 90
+    MaxEnergy: 140
     EnergyRegenerationRate: 0
     EffectHitRate: 0
     EffectRES: 0
+    Aggro: 75
+  Rarity: 5

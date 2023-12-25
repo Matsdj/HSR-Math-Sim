@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be8d09e4d83fc12498ed6f45b5865ed7, type: 3}
+  m_Name: Trailblazer (Physical)
+  m_EditorClassIdentifier: 
+  sprite: {fileID: 21300000, guid: 8b9a6919c9323504eb35d454771fc50e, type: 3}
+  LVL: 1
+  Ascension: 0
+  baseStats:
+    HP: 163.68
+    ATK: 84.48
+    DEF: 62.7
+    SPD: 100
+  advancedStats:
+    CRIT_Rate: 5
+    CRIT_DMG: 50
+    BreakEffect: 0
+    OutgoingHealingBoost: 0
+    MaxEnergy: 120
+    EnergyRegenerationRate: 0
+    EffectHitRate: 0
+    EffectRES: 0
+    Aggro: 125
+  Rarity: 5

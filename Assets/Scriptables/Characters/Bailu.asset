@@ -10,20 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be8d09e4d83fc12498ed6f45b5865ed7, type: 3}
-  m_Name: Asta
+  m_Name: Bailu
   m_EditorClassIdentifier: 
-  LVL: 80
+  sprite: {fileID: 21300000, guid: 07e6db74f45070c4a9b59b5147cd3411, type: 3}
+  LVL: 1
+  Ascension: 0
   baseStats:
-    HP: 1023
-    ATK: 511
-    DEF: 463
-    SPD: 106
+    HP: 179.52
+    ATK: 76.56
+    DEF: 66
+    SPD: 98
   advancedStats:
-    CRIT_Rate: 0
-    CRIT_DMG: 0
+    CRIT_Rate: 5
+    CRIT_DMG: 50
     BreakEffect: 0
     OutgoingHealingBoost: 0
-    MaxEnergy: 120
+    MaxEnergy: 100
     EnergyRegenerationRate: 0
     EffectHitRate: 0
     EffectRES: 0
+    Aggro: 100
+  Rarity: 5
