@@ -12,5 +12,5 @@ public class Character : ScriptableObject
     public AdvancedStats advancedStats;
     public int Rarity = 4;
 
-    
+    public List<float> AttackPercentages = new List<float>();
 }

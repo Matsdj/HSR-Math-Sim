@@ -22,4 +22,15 @@ public class Types
         Ultimate,
         FollowUp
     }
+
+    public enum Path
+    {
+        Destruction,
+        TheHunt,
+        Erudition,
+        Harmony,
+        Nihility,
+        Preservation,
+        Abundance
+    }
 }
