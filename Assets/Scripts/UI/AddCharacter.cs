@@ -6,16 +6,9 @@ using UnityEngine.UI;
 public class AddCharacter : MonoBehaviour
 {
     public Image icon;
-    public 
-    // Start is called before the first frame update
-    void Start()
+    
+    public void UseCharacterPreset(Character character)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        icon.sprite = character.sprite;
     }
 }

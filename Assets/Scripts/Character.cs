@@ -13,4 +13,6 @@ public class Character : ScriptableObject
     public int Rarity = 4;
 
     public List<float> AttackPercentages = new List<float>();
+
+    public AudioClip audio;
 }

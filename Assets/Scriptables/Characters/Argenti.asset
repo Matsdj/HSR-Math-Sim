@@ -20,14 +20,28 @@ MonoBehaviour:
     ATK: 100.32
     DEF: 49.5
     SPD: 103
+    finalHP: 0
+    finalATK: 0
+    finalDEF: 0
+    finalSPD: 0
+    percentHP: 0
+    flatHP: 0
+    percentATK: 0
+    flatATK: 0
+    percentDEF: 0
+    flatDEF: 0
+    percentSPD: 0
+    flatSPD: 0
   advancedStats:
     CRIT_Rate: 5
     CRIT_DMG: 50
     BreakEffect: 0
     OutgoingHealingBoost: 0
-    MaxEnergy: 90
     EnergyRegenerationRate: 0
     EffectHitRate: 0
     EffectRES: 0
+    MaxEnergy: 90
     Aggro: 75
   Rarity: 5
+  AttackPercentages: []
+  audio: {fileID: 0}

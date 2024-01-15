@@ -20,10 +20,12 @@ public class CharacterGridPiece : MonoBehaviour
         text.text = c.name;
         _character = c;
         button.onClick.AddListener(OnClick);
+        _addCharacter = addCharacter;
     }
 
     private void OnClick()
     {
-        throw new NotImplementedException();
+        _addCharacter.gameObject.SetActive(true);
+        _addCharacter.UseCharacterPreset(_character);
     }
 }
