@@ -20,6 +20,13 @@ namespace Types
         Effect_RES
     }
 
+    public enum OtherEffects
+    {
+        Heal,
+        Shield,
+        Energy
+    }
+
     public enum Element
     {
         All,
@@ -87,8 +94,10 @@ namespace Types
         EnemyEnterField,
         EnemyLeaveField,
         WeaknessBreak,
-        Ult,
-        Skill,
+        BeforeUlt,
+        AfterUlt,
+        BeforeSkill,
+        AfterSkill,
     }
 
     public enum TriggerConditions
