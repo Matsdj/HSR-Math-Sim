@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Trailblazer (Physical)
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 8b9a6919c9323504eb35d454771fc50e, type: 3}
+  path: 0
+  element: 0
   LVL: 1
   Ascension: 0
   baseStats:
@@ -20,14 +22,39 @@ MonoBehaviour:
     ATK: 84.48
     DEF: 62.7
     SPD: 100
+    finalHP: 0
+    finalATK: 0
+    finalDEF: 0
+    finalSPD: 0
+    percentHP: 0
+    flatHP: 0
+    percentATK: 0
+    flatATK: 0
+    percentDEF: 0
+    flatDEF: 0
+    percentSPD: 0
+    flatSPD: 0
   advancedStats:
     CRIT_Rate: 5
     CRIT_DMG: 50
     BreakEffect: 0
     OutgoingHealingBoost: 0
-    MaxEnergy: 120
     EnergyRegenerationRate: 0
     EffectHitRate: 0
     EffectRES: 0
+    MaxEnergy: 120
     Aggro: 125
   Rarity: 5
+  Basic: {fileID: 11400000, guid: 6ba1e4824952b1c4e8a6709b1c09f9b0, type: 2}
+  Skill: {fileID: 11400000, guid: 76f0306f43195e046a0b97751142b479, type: 2}
+  Ultimate: {fileID: 0}
+  Talent:
+    Trigger:
+      Trigger: 
+      Condition: 
+      UseAnd: 0
+    effect: {fileID: 0}
+    effectStackCountInflicted: 1
+  Technique: {fileID: 0}
+  AttackPercentages: []
+  audio: {fileID: 0}

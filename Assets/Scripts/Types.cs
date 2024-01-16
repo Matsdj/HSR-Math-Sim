@@ -39,8 +39,29 @@ namespace Types
         BasicAttack,
         Skill,
         Ultimate,
+        Talent,
+        Technique,
         FollowUp,
         DOT
+    }
+
+    public enum AbilityTargets
+    {
+        EnemySingle,
+        EnemyArea,
+        EnemyAll,
+        Self,
+        AllySingle,
+        AllyOthers, //Excluding cause
+        AllyAll,
+    }
+
+    public enum AbilityEffect
+    {
+        DMG,
+        Heal,
+        Shield,
+        Buff
     }
 
     public enum Path
@@ -73,10 +94,12 @@ namespace Types
     public enum TriggerConditions
     {
         None,
-        Me,
-        Ally,
-        TargetEnemy,
-        AnyEnemy,
+        ImTheCause,
+        AllyIsTheCause,
+        EnemyIsTheCause,
+        ImReceiver,
+        AllyIsTheReceiver,
+        EnemyIsTheReceiver,
         Below50perHealth,
     }
 }

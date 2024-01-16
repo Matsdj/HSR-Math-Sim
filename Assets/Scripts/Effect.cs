@@ -1,7 +1,7 @@
 using Types;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Effect", menuName = "ScriptableObjects/Effect", order = 2)]
+[CreateAssetMenu(fileName = "Effect", menuName = "ScriptableObjects/Effect", order = 4)]
 public class Effect : ScriptableObject
 {
     public Stats Stat;
