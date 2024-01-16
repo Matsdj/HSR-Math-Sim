@@ -6,7 +6,7 @@ namespace Types
 {
     public enum Stats
     {
-        HP,
+        HP, //This is max
         ATK,
         DEF,
         SPD,
@@ -17,11 +17,14 @@ namespace Types
         Max_Energy,
         Energy_Regeneration_Rate,
         Effect_Hit_Rate,
-        Effect_RES
+        Effect_RES,
+        MissingHP,
+        CurrentHP
     }
 
     public enum OtherEffects
     {
+        None,
         Heal,
         Shield,
         Energy

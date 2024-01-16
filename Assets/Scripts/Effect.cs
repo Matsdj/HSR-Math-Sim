@@ -13,6 +13,7 @@ public class Effect : ScriptableObject
 
     public OtherEffects OtherEffects;
     public Stats ScalesOf;
+    public bool ScaleOfTargetStats;
     public float PerIncreaseOther;
 
     public AbilityType OnlyAppliesToAbilityType;
