@@ -5,8 +5,8 @@ using UnityEngine;
 public class Effect : ScriptableObject
 {
     public Stats Stat;
-    public float StatIncrease;
-    public float StatPerIncrease;
+    public float FlatIncrease;
+    public float PerIncrease;
     public Element DMG_Type;
     public float DMG_PerIncrease;
 
