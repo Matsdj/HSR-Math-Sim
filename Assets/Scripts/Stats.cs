@@ -59,4 +59,10 @@ public class AdvancedStats
         EffectRES;
     public float MaxEnergy,
         Aggro;
+    [HideInInspector] public ElementBoost DMG_Boosts, RES_Boosts;
+
+    public class ElementBoost
+    {
+        public float Physical, Fire, Ice, Lightning, Wind, Quantum, Imaginary;
+    }
 }
