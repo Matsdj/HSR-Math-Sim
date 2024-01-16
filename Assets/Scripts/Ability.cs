@@ -7,7 +7,7 @@ using Types;
 public class Ability : ScriptableObject
 {
     public AbilityType AbilityType;
-    public AbilityTargets Targets;
+    public Targets Targets;
     public Stats ScalingStat;
     public float ScalingPer;
     public float ScalingPerReductionForNonMainTargets;

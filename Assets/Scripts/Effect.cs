@@ -9,12 +9,13 @@ public class Effect : ScriptableObject
     public float PerIncrease;
 
     public Element DMG_Type;
-    public AbilityType DMG_Type2;
     public float DMG_PerIncrease;
 
     public OtherEffects OtherEffects;
     public Stats ScalesOf;
     public float PerIncreaseOther;
+
+    public AbilityType OnlyAppliesToAbilityType;
 
     public int StackMax;
     public bool StackCountMultipliesBuff;

@@ -52,7 +52,7 @@ namespace Types
         DOT
     }
 
-    public enum AbilityTargets
+    public enum Targets
     {
         EnemySingle,
         EnemyArea,
