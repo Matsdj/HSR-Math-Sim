@@ -6,6 +6,7 @@ namespace Types
 {
     public enum Stats
     {
+        None,
         HP, //This is max
         ATK,
         DEF,
@@ -18,8 +19,8 @@ namespace Types
         Energy_Regeneration_Rate,
         Effect_Hit_Rate,
         Effect_RES,
-        MissingHP,
-        CurrentHP
+        CurrentHP,
+        MissingHP
     }
 
     public enum OtherEffects
@@ -27,13 +28,15 @@ namespace Types
         None,
         Heal,
         Shield,
-        Energy
+        Energy,
+        ActionAdvance,
+        DealDMG,
     }
 
     public enum Element
     {
-        All,
         None, //Not sure if this will be used but its anoying to add stuff to enums later
+        All,
         Physical,
         Fire,
         Ice,
@@ -101,6 +104,8 @@ namespace Types
         AfterUlt,
         BeforeSkill,
         AfterSkill,
+        BeforeTakingDamage,
+        AfterTakingDamage
     }
 
     public enum TriggerConditions
@@ -111,7 +116,22 @@ namespace Types
         EnemyIsTheCause,
         ImReceiver,
         AllyIsTheReceiver,
-        EnemyIsTheReceiver,
-        Below50perHealth,
+        EnemyIsTheReceiver
+    }
+
+    public enum AboveOrBelow
+    {
+        Below,
+        Above
+    }
+
+    public enum RelicPieces
+    {
+        Head,
+        Hand,
+        Body,
+        Feet,
+        Sphere,
+        Rope
     }
 }

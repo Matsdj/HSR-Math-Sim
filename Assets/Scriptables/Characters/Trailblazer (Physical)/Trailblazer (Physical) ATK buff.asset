@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 81c33b9cb39fd734a84508cda35980dd, type: 3}
-  m_Name: On the Fall of an Aeon ATK
+  m_Name: Trailblazer (Physical) ATK buff
   m_EditorClassIdentifier: 
   Stat: 2
   OtherEffects: 0
   DMG_Type: 0
   FlatIncrease: 0
-  PerIncrease: 8
+  PerIncrease: 10
   ScalesOf: 0
   ScaleOfTargetStats: 0
   PerIncreaseOther: 0
   OnlyAppliesToAbilityType: 0
-  StackMax: 4
+  StackMax: 2
   StackCountMultipliesBuff: 1
   StackCountDecreaseAmountPerTurn: 0

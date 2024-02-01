@@ -20,15 +20,29 @@ MonoBehaviour:
   ATK: 24
   DEF: 18
   mechanics:
-  - Trigger:
-      Trigger: 03000000
-      Condition: 01000000
-      UseAnd: 0
+  - Trigger: 03000000
+    Condition: 01000000
+    TargetNeedsEffects: []
+    excludeIfEffect: 0
+    StatCondition: 0
+    AboveOrBelow: 0
+    FlatAmount: 0
+    PerAmount: 0
+    X: 0
+    UseAnd: 0
+    target: 3
     effect: {fileID: 11400000, guid: d4bf57d5f9cfca54dab0e6664233c02c, type: 2}
     effectStackCountInflicted: 1
-  - Trigger:
-      Trigger: 07000000
-      Condition: 02000000
-      UseAnd: 0
+  - Trigger: 07000000
+    Condition: 01000000
+    TargetNeedsEffects: []
+    excludeIfEffect: 0
+    StatCondition: 0
+    AboveOrBelow: 0
+    FlatAmount: 0
+    PerAmount: 0
+    X: 0
+    UseAnd: 0
+    target: 3
     effect: {fileID: 11400000, guid: d4bf57d5f9cfca54dab0e6664233c02c, type: 2}
     effectStackCountInflicted: 2

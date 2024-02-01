@@ -10,18 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 81c33b9cb39fd734a84508cda35980dd, type: 3}
-  m_Name: Trailblazer (Physical) Technique
+  m_Name: Champion of Streetwise Boxing Effect 1
   m_EditorClassIdentifier: 
   Stat: 0
+  OtherEffects: 0
+  DMG_Type: 2
   FlatIncrease: 0
-  PerIncrease: 0
-  DMG_Type: 0
-  DMG_PerIncrease: 0
-  OtherEffects: 1
+  PerIncrease: 10
   ScalesOf: 0
-  ScaleOfTargetStats: 1
-  PerIncreaseOther: 15
+  ScaleOfTargetStats: 0
+  PerIncreaseOther: 0
   OnlyAppliesToAbilityType: 0
-  StackMax: 0
+  StackMax: 1
   StackCountMultipliesBuff: 0
   StackCountDecreaseAmountPerTurn: 0

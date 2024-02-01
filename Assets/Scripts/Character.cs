@@ -19,7 +19,7 @@ public class Character : ScriptableObject
     public Ability Skill;
     public Ability Ultimate;
     public Mechanics Talent;
-    public Ability Technique;
+    public Mechanics Technique;
 
     public List<float> AttackPercentages = new List<float>();
 

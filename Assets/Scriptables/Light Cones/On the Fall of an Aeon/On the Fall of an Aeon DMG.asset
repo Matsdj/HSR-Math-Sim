@@ -13,10 +13,14 @@ MonoBehaviour:
   m_Name: On the Fall of an Aeon DMG
   m_EditorClassIdentifier: 
   Stat: 0
-  StatIncrease: 0
-  StatPerIncrease: 0
-  DMG_Type: 0
-  DMG_PerIncrease: 12
+  OtherEffects: 0
+  DMG_Type: 1
+  FlatIncrease: 0
+  PerIncrease: 12
+  ScalesOf: 0
+  ScaleOfTargetStats: 0
+  PerIncreaseOther: 0
+  OnlyAppliesToAbilityType: 0
   StackMax: 2
   StackCountMultipliesBuff: 0
   StackCountDecreaseAmountPerTurn: 1

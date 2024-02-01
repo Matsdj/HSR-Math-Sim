@@ -12,4 +12,6 @@ public class Ability : ScriptableObject
     public float ScalingPer;
     public float ScalingPerReductionForNonMainTargets;
     public Effect ApplyEffectToTarget;
+    [Tooltip("Talents and Techniques need mechanics")]
+    public Mechanics Mechanic;
 }

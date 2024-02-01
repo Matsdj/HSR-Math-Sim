@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Trailblazer (Physical)
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 8b9a6919c9323504eb35d454771fc50e, type: 3}
-  path: 0
-  element: 0
+  path: 1
+  element: 2
   LVL: 1
   Ascension: 0
   baseStats:
@@ -49,12 +49,32 @@ MonoBehaviour:
   Skill: {fileID: 11400000, guid: 76f0306f43195e046a0b97751142b479, type: 2}
   Ultimate: {fileID: 11400000, guid: fe78d60c62087c143806435a6af8f144, type: 2}
   Talent:
-    Trigger: 000000000000000000000000
-    Condition: 
+    Trigger: 07000000
+    Condition: 01000000
+    TargetNeedsEffects: []
+    excludeIfEffect: 0
+    StatCondition: 0
+    AboveOrBelow: 0
+    FlatAmount: 0
+    PerAmount: 0
+    X: 0
     UseAnd: 0
-    target: 0
-    effect: {fileID: 0}
+    target: 3
+    effect: {fileID: 11400000, guid: e3ce6c46e2acfb642a8244ac58694346, type: 2}
     effectStackCountInflicted: 1
-  Technique: {fileID: 0}
+  Technique:
+    Trigger: 00000000
+    Condition: 
+    TargetNeedsEffects: []
+    excludeIfEffect: 0
+    StatCondition: 0
+    AboveOrBelow: 0
+    FlatAmount: 0
+    PerAmount: 0
+    X: 0
+    UseAnd: 0
+    target: 6
+    effect: {fileID: 11400000, guid: 4cacf5219a23a7c429f8066622471e72, type: 2}
+    effectStackCountInflicted: 1
   AttackPercentages: []
   audio: {fileID: 0}
