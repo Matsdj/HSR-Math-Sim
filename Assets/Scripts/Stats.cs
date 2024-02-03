@@ -11,12 +11,16 @@ public class BaseStats
     public float HP;
     public float ATK;
     public float DEF;
-    public float SPD;
+    public float SPD; //Also the base SPD
 
     [HideInInspector] public float finalHP;
     [HideInInspector] public float finalATK;
     [HideInInspector] public float finalDEF;
     [HideInInspector] public float finalSPD;
+
+    [HideInInspector] public float baseHP = 0;
+    [HideInInspector] public float baseATK = 0;
+    [HideInInspector] public float baseDEF = 0;
 
     [HideInInspector] public float percentHP = 0;
     [HideInInspector] public float flatHP = 0;
@@ -26,23 +30,55 @@ public class BaseStats
     [HideInInspector] public float flatDEF = 0;
     [HideInInspector] public float percentSPD = 0;
     [HideInInspector] public float flatSPD = 0;
-    public void FinalStats(int lvl, int ascension, string LightCone, string[] EquipmentStats)
+
+    public void Calculate(int lvl, int ascension, LightCone lc)
     {
         //At current lvl
-        float tempHP = HP + HP * 0.05f * (lvl - 1) + HP * 0.4f * (ascension);
-        float tempATK = ATK + ATK * 0.05f * (lvl - 1) + ATK * 0.4f * (ascension);
-        float tempDEF = DEF + DEF * 0.05f * (lvl - 1) + DEF * 0.4f * (ascension);
-        float tempSPD = SPD;
+        float charHP = ScaleStat(lvl, ascension, HP);
+        float charATK = ScaleStat(lvl, ascension, ATK);
+        float charDEF = ScaleStat(lvl, ascension, DEF);
 
+        //Lightcone
+        float lightConeHP = ScaleStat(lc.LVL, lc.Ascension, lc.HP);
+        float lightConeATK = ScaleStat(lc.LVL, lc.Ascension, lc.ATK);
+        float lightConeDEF = ScaleStat(lc.LVL, lc.Ascension, lc.DEF);
 
-        //TODO Lightcone
+        baseHP = charHP + lightConeHP;
+        baseATK = charATK + lightConeATK;
+        baseDEF = charDEF + lightConeDEF;
+    }
 
-        //TODO Equipment
+    public float ScaleStat(int lvl, int ascension, float baseStat)
+    {
+        return baseStat + baseStat * 0.05f * (lvl - 1) + baseStat * 0.4f * (ascension);
+    }
 
-        finalHP = tempHP * (1 + percentHP);
-        finalATK = tempATK * (1 + percentATK);
-        finalDEF = tempDEF * (1 + percentDEF);
-        finalSPD = tempSPD * (1 + percentSPD);
+    public void CalculateAllFinalStats()
+    {
+        finalHP = baseHP + baseHP * percentHP + flatHP;
+        finalATK = baseATK + baseATK * percentATK + flatATK;
+        finalDEF = baseDEF + baseDEF * percentDEF + flatDEF;
+        finalSPD = SPD + SPD * percentSPD + flatSPD;
+    }
+
+    public void CalculateFinalHP()
+    {
+        finalHP = baseHP + baseHP * percentHP + flatHP;
+    }
+
+    public void CalculateFinalATK()
+    {
+        finalATK = baseATK + baseATK * percentATK + flatATK;
+    }
+
+    public void CalculateFinalDEF()
+    {
+        finalDEF = baseDEF + baseDEF * percentDEF + flatDEF;
+    }
+
+    public void CalculateFinalSPD()
+    {
+        finalSPD = SPD + SPD * percentSPD + flatSPD;
     }
 }
 

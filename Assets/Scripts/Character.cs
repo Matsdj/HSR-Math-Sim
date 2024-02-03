@@ -21,7 +21,10 @@ public class Character : ScriptableObject
     public Mechanics Talent;
     public Mechanics Technique;
 
-    public List<float> AttackPercentages = new List<float>();
+    public LightCone LightCone;
+    public Relic[] Relics = new Relic[6];
+
+    public List<Effect> Buffs = new List<Effect>();
 
     public AudioClip audio;
 }

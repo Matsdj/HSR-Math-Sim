@@ -92,7 +92,7 @@ namespace Types
     public enum Triggers
     {
         //All this triggers will have events that pass through 2 values: The Cause, The receiver (List)
-        None, //Just here as a placeholder and for testing
+        Always, //Always active even outside of combat
         StartOfCombat, //Is an exception because there will be no cause only inflicted.
         BeforeAttack,
         AfterAttack,

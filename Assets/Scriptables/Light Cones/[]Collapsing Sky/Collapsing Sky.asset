@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4ccf0a959826604aac139bfff8b753b, type: 3}
+  m_Name: Collapsing Sky
+  m_EditorClassIdentifier: 
+  Sprite: {fileID: 21300000, guid: 0aac0598e05616641b3e2959cecfaa34, type: 3}
+  Path: 1
+  LVL: 1
+  Ascension: 0
+  HP: 38.4
+  ATK: 16.8
+  DEF: 9
+  mechanics:
+  - Trigger: 
+    Condition: 
+    UseAnd: 0
+    target: 0
+    effect: {fileID: 11400000, guid: 35d291241e65d904c9f20fc9a0e88fde, type: 2}
+    effectStackCountInflicted: 3
