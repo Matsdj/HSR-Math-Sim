@@ -15,7 +15,7 @@ public class Effect : ScriptableObject
     [Tooltip("Forgot what this is for XD")]
     public float PerIncreaseOther;
 
-    public AbilityType OnlyAppliesToAbilityType;
+    public AbilityType[] OnlyAppliesToAbilityType;
 
     public int StackMax = 1;
     public bool StackCountMultipliesBuff;

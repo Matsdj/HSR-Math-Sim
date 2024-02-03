@@ -21,7 +21,6 @@ MonoBehaviour:
     AboveOrBelow: 0
     FlatAmount: 0
     PerAmount: 0
-    X: 0
     UseAnd: 0
     target: 0
     effect: {fileID: 11400000, guid: 86880d30bffae1047bcce70b38aea5a1, type: 2}
@@ -30,13 +29,12 @@ MonoBehaviour:
     Condition: 
     TargetNeedsEffects: []
     excludeIfEffect: 0
-    StatCondition: 0
-    AboveOrBelow: 0
+    StatCondition: 5
+    AboveOrBelow: 1
     FlatAmount: 0
-    PerAmount: 0
-    X: 0
+    PerAmount: 70
     UseAnd: 0
-    target: 0
+    target: 3
     effect: {fileID: 11400000, guid: 86880d30bffae1047bcce70b38aea5a1, type: 2}
     effectStackCountInflicted: 1
   SetEffect2: []

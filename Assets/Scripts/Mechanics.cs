@@ -15,8 +15,6 @@ public class Mechanics
     public AboveOrBelow AboveOrBelow;
     public float FlatAmount;
     public float PerAmount;
-    [Tooltip("Some Conditions need an X value")]
-    public float X;
 
     [Tooltip("False means that it is comparing the conditions with OR, True means its And")]
     public bool UseAnd = false;
