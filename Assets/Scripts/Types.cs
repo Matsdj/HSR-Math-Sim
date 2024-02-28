@@ -66,6 +66,7 @@ namespace Types
         Self,
         AllySingle,
         AllyOthers, //Excluding cause
+        AllyArea,
         AllyAll,
     }
 

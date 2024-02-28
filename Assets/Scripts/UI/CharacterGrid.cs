@@ -18,7 +18,13 @@ public class CharacterGrid : MonoBehaviour
         }
         foreach (Character c in collection.list)
         {
-            Instantiate(prefab, transform).Apply(c, AddCharacter);
+            Instantiate(prefab, transform).Apply(c, OnAddCharacter);
         }
+    }
+
+    private void OnAddCharacter(Character character)
+    {
+        AddCharacter.gameObject.SetActive(true);
+        AddCharacter.UseCharacterPreset(character);
     }
 }

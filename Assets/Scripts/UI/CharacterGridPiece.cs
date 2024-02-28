@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -12,20 +9,28 @@ public class CharacterGridPiece : MonoBehaviour
     public TMP_Text text;
     public Button button;
     private Character _character;
-    private AddCharacter _addCharacter;
+    //Add characterUI
+    private UnityEvent<Character> _addCharacterEvent;
 
-    public void Apply(Character c, AddCharacter addCharacter)
+
+    protected virtual void Apply(Character c)
     {
         image.sprite = c.sprite;
         text.text = c.name;
         _character = c;
         button.onClick.AddListener(OnClick);
-        _addCharacter = addCharacter;
+        _addCharacterEvent = new UnityEvent<Character>();
     }
 
-    private void OnClick()
+    //This function is used in Character adding UI
+    public void Apply(Character c, UnityAction<Character> function)
     {
-        _addCharacter.gameObject.SetActive(true);
-        _addCharacter.UseCharacterPreset(_character);
+        Apply(c);
+        _addCharacterEvent.AddListener(function);
+    }
+
+    protected virtual void OnClick()
+    {
+        _addCharacterEvent.Invoke(_character);
     }
 }

@@ -8,10 +8,12 @@ public class Ability : ScriptableObject
 {
     public AbilityType AbilityType;
     public Targets Targets;
+    public OtherEffects MainEffect;
     public Stats ScalingStat;
     public float ScalingPer;
     public float ScalingPerReductionForNonMainTargets;
+    public float FlatAmount;
     public Effect ApplyEffectToTarget;
     [Tooltip("Talents and Techniques need mechanics")]
-    public Mechanics Mechanic;
+    public Mechanics Passive;
 }

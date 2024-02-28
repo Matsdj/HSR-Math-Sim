@@ -18,13 +18,11 @@ public class Character : ScriptableObject
     public Ability Basic;
     public Ability Skill;
     public Ability Ultimate;
-    public Mechanics Talent;
-    public Mechanics Technique;
+    public Ability Talent;
+    public Ability Technique;
 
     public LightCone LightCone;
     public Relic[] Relics = new Relic[6];
-
-    public List<Effect> Buffs = new List<Effect>();
 
     public AudioClip audio;
 }
