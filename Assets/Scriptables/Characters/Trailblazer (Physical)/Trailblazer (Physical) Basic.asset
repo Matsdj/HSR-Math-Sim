@@ -16,7 +16,7 @@ MonoBehaviour:
   Targets: 0
   MainEffect: 5
   ScalingStat: 2
-  ScalingPer: 62.5
+  ScalingPer: 50
   ScalingPerReductionForNonMainTargets: 0
   FlatAmount: 0
   ApplyEffectToTarget: {fileID: 0}

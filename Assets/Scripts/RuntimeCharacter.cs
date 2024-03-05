@@ -4,18 +4,17 @@ using System.Collections.Generic;
 using Types;
 using UnityEngine;
 
-public class RuntimeCharacter
+public class RuntimeCharacter : RuntimeStats
 {
-    public Character BasedOfCharacter;
-    public RuntimeStats Stats;
+    public readonly Character BasedOfCharacter;
     public List<Effect> Buffs = new List<Effect>();
 
     public Dictionary<Triggers, List<Action<RuntimeCharacter>>> Events;
+    public override float Energy { get => base.Energy; set { base.Energy = value; Invoke(Triggers.EnergyChange); } }
 
-    public RuntimeCharacter(Character basedOfCharacter)
+    public RuntimeCharacter(Character basedOfCharacter) : base(basedOfCharacter)
     {
         BasedOfCharacter = basedOfCharacter;
-        Stats = new RuntimeStats(this);
 
         Triggers[] triggers = (Triggers[])Enum.GetValues(typeof(Triggers));
         Events = new Dictionary<Triggers, List<Action<RuntimeCharacter>>>();
@@ -29,37 +28,37 @@ public class RuntimeCharacter
     {
         switch (stat)
         {
-            case Types.Stats.None:
+            case Stats.None:
                 Debug.LogError("None is not a valid Stat");
                 return 0;
-            case Types.Stats.HP:
-                return Stats.Final.HP;
-            case Types.Stats.ATK:
-                return Stats.Final.ATK;
-            case Types.Stats.DEF:
-                return Stats.Final.DEF;
-            case Types.Stats.SPD:
-                return Stats.Final.SPD;
-            case Types.Stats.CRIT_Rate:
-                return Stats.Adv.CRIT_Rate;
-            case Types.Stats.CRIT_DMG:
-                return Stats.Adv.CRIT_DMG;
-            case Types.Stats.Break_Effect:
-                return Stats.Adv.BreakEffect;
-            case Types.Stats.Outgoing_Healing_Boost:
-                return Stats.Adv.OutgoingHealingBoost;
-            case Types.Stats.Max_Energy:
-                return Stats.Adv.MaxEnergy;
-            case Types.Stats.Energy_Regeneration_Rate:
-                return Stats.Adv.EnergyRegenerationRate;
-            case Types.Stats.Effect_Hit_Rate:
-                return Stats.Adv.EffectHitRate;
-            case Types.Stats.Effect_RES:
-                return Stats.Adv.EffectRES;
-            case Types.Stats.CurrentHP:
-                return Stats.CurrentHP;
-            case Types.Stats.MissingHP:
-                return Stats.Final.HP - Stats.CurrentHP;
+            case Stats.HP:
+                return Final.HP;
+            case Stats.ATK:
+                return Final.ATK;
+            case Stats.DEF:
+                return Final.DEF;
+            case Stats.SPD:
+                return Final.SPD;
+            case Stats.CRIT_Rate:
+                return Adv.CRIT_Rate;
+            case Stats.CRIT_DMG:
+                return Adv.CRIT_DMG;
+            case Stats.Break_Effect:
+                return Adv.BreakEffect;
+            case Stats.Outgoing_Healing_Boost:
+                return Adv.OutgoingHealingBoost;
+            case Stats.Max_Energy:
+                return Adv.MaxEnergy;
+            case Stats.Energy_Regeneration_Rate:
+                return Adv.EnergyRegenerationRate;
+            case Stats.Effect_Hit_Rate:
+                return Adv.EffectHitRate;
+            case Stats.Effect_RES:
+                return Adv.EffectRES;
+            case Stats.CurrentHP:
+                return CurrentHP;
+            case Stats.MissingHP:
+                return Final.HP - CurrentHP;
         }
         Debug.LogError("Unimplemented Stat");
         return 0;

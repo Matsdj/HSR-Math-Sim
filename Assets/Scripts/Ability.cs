@@ -6,6 +6,7 @@ using Types;
 [CreateAssetMenu(fileName = "Ability", menuName = "ScriptableObjects/Ability", order = 2)]
 public class Ability : ScriptableObject
 {
+    public int EnergyGeneration = 20;
     public AbilityType AbilityType;
     public Targets Targets;
     public OtherEffects MainEffect;

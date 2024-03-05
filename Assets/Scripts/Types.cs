@@ -27,7 +27,7 @@ namespace Types
     {
         None,
         Heal,
-        Shield,
+        Buff,
         Energy,
         ActionAdvance,
         DealDMG,
@@ -106,7 +106,8 @@ namespace Types
         BeforeSkill,
         AfterSkill,
         BeforeTakingDamage,
-        AfterTakingDamage
+        AfterTakingDamage,
+        EnergyChange
     }
 
     public enum TriggerConditions

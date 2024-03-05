@@ -22,18 +22,6 @@ MonoBehaviour:
     ATK: 84.48
     DEF: 62.7
     SPD: 100
-    finalHP: 0
-    finalATK: 0
-    finalDEF: 0
-    finalSPD: 0
-    percentHP: 0
-    flatHP: 0
-    percentATK: 0
-    flatATK: 0
-    percentDEF: 0
-    flatDEF: 0
-    percentSPD: 0
-    flatSPD: 0
   advancedStats:
     CRIT_Rate: 5
     CRIT_DMG: 50
@@ -48,33 +36,14 @@ MonoBehaviour:
   Basic: {fileID: 11400000, guid: 6ba1e4824952b1c4e8a6709b1c09f9b0, type: 2}
   Skill: {fileID: 11400000, guid: 76f0306f43195e046a0b97751142b479, type: 2}
   Ultimate: {fileID: 11400000, guid: fe78d60c62087c143806435a6af8f144, type: 2}
-  Talent:
-    Trigger: 07000000
-    Condition: 01000000
-    TargetNeedsEffects: []
-    excludeIfEffect: 0
-    StatCondition: 0
-    AboveOrBelow: 0
-    FlatAmount: 0
-    PerAmount: 0
-    X: 0
-    UseAnd: 0
-    target: 3
-    effect: {fileID: 11400000, guid: e3ce6c46e2acfb642a8244ac58694346, type: 2}
-    effectStackCountInflicted: 1
-  Technique:
-    Trigger: 00000000
-    Condition: 
-    TargetNeedsEffects: []
-    excludeIfEffect: 0
-    StatCondition: 0
-    AboveOrBelow: 0
-    FlatAmount: 0
-    PerAmount: 0
-    X: 0
-    UseAnd: 0
-    target: 6
-    effect: {fileID: 11400000, guid: 4cacf5219a23a7c429f8066622471e72, type: 2}
-    effectStackCountInflicted: 1
-  AttackPercentages: []
+  Talent: {fileID: 11400000, guid: 2f1b8ebf0eb3b784888d63604a2f5d5e, type: 2}
+  Technique: {fileID: 11400000, guid: da8a446f29eefcc42ae476c589a55986, type: 2}
+  LightCone: {fileID: 0}
+  Relics:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   audio: {fileID: 0}

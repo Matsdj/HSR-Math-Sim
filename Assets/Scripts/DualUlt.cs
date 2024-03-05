@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Ability", menuName = "ScriptableObjects/DualUlt", order = 4)]
-public class DualUlt : Ability
+public class DualUlt : Ultimate
 {
-    public Ability ability2;
+    public Ultimate Ult2;
 }

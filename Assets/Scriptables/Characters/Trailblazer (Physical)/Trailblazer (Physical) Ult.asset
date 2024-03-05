@@ -12,10 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68385a0da94c59c478bc6bd2932ed95b, type: 3}
   m_Name: Trailblazer (Physical) Ult
   m_EditorClassIdentifier: 
+  EnergyGeneration: 5
   AbilityType: 3
   Targets: 0
-  ScalingStat: 1
-  ScalingPer: 0
+  MainEffect: 5
+  ScalingStat: 2
+  ScalingPer: 300
   ScalingPerReductionForNonMainTargets: 0
+  FlatAmount: 0
   ApplyEffectToTarget: {fileID: 0}
-  ability2: {fileID: 11400000, guid: 758c90f633235da4ea20176705586531, type: 2}
+  Passive:
+    Trigger: 
+    Condition: 
+    TargetNeedsEffects: []
+    excludeIfEffect: 0
+    StatCondition: 0
+    AboveOrBelow: 0
+    FlatAmount: 0
+    PerAmount: 0
+    UseAnd: 0
+    target: 0
+    effect: {fileID: 0}
+    effectStackCountInflicted: 1
+  EnergyCost: 120
+  Ult2: {fileID: 11400000, guid: 6997251fac9902e4f8c0ef12e698f679, type: 2}

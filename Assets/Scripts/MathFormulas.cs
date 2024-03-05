@@ -34,6 +34,11 @@ public class MathFormulas
         return 1 + critDMG;
     }
 
+    public static float Crit(float critChance, float critDMG)
+    {
+        return (critChance > Random.value) ? 1 + critDMG : 1;
+    }
+
     /// <summary>
     /// DMG% Multiplier = 100% + Elemental DMG% + All Type DMG% + DoT DMG% + Other DMG%
     /// </summary>
@@ -110,5 +115,4 @@ public class MathFormulas
     {
         return 0.9f + 0.1f * (isWeaknessBroken ? 1 : 0);
     }
-
 }

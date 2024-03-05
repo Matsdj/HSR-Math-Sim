@@ -17,7 +17,7 @@ public class Character : ScriptableObject
 
     public Ability Basic;
     public Ability Skill;
-    public Ability Ultimate;
+    public Ultimate Ultimate;
     public Ability Talent;
     public Ability Technique;
 

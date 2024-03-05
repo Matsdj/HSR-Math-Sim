@@ -12,13 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e7443473d67edb41acabc939969cba9, type: 3}
   m_Name: Trailblazer (Physical) Technique
   m_EditorClassIdentifier: 
+  EnergyGeneration: 0
   AbilityType: 0
   Targets: 0
+  MainEffect: 0
   ScalingStat: 0
   ScalingPer: 0
   ScalingPerReductionForNonMainTargets: 0
+  FlatAmount: 0
   ApplyEffectToTarget: {fileID: 0}
-  Mechanic:
+  Passive:
     Trigger: 
     Condition: 
     TargetNeedsEffects: []

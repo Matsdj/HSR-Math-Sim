@@ -9,16 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b0a20f15ae4cf548a69b32bee2da759, type: 3}
-  m_Name: Trailblazer (Physical) Ult2
+  m_Script: {fileID: 11500000, guid: 4e7443473d67edb41acabc939969cba9, type: 3}
+  m_Name: old
   m_EditorClassIdentifier: 
-  EnergyGeneration: 20
+  EnergyGeneration: 5
   AbilityType: 3
   Targets: 1
-  MainEffect: 5
-  ScalingStat: 2
-  ScalingPer: 180
-  ScalingPerReductionForNonMainTargets: 40
+  MainEffect: 0
+  ScalingStat: 1
+  ScalingPer: 0
+  ScalingPerReductionForNonMainTargets: 0
   FlatAmount: 0
   ApplyEffectToTarget: {fileID: 0}
   Passive:
@@ -34,4 +34,3 @@ MonoBehaviour:
     target: 0
     effect: {fileID: 0}
     effectStackCountInflicted: 1
-  EnergyCost: 120

@@ -13,23 +13,22 @@ public class CharacterGridPiece : MonoBehaviour
     private UnityEvent<Character> _addCharacterEvent;
 
 
-    protected virtual void Apply(Character c)
+    protected virtual void Setup(Character c)
     {
         image.sprite = c.sprite;
         text.text = c.name;
         _character = c;
-        button.onClick.AddListener(OnClick);
         _addCharacterEvent = new UnityEvent<Character>();
     }
 
     //This function is used in Character adding UI
     public void Apply(Character c, UnityAction<Character> function)
     {
-        Apply(c);
+        Setup(c);
         _addCharacterEvent.AddListener(function);
     }
 
-    protected virtual void OnClick()
+    public virtual void OnClick()
     {
         _addCharacterEvent.Invoke(_character);
     }
