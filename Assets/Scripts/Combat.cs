@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Types;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,23 +18,28 @@ public class Combat : MonoBehaviour
     public HorizontalLayoutGroup EnemyUI;
     public CombatCharacterPiece CharacterButtonUIPrefab;
     public RectTransform SelectedCharacterUI;
+    public TMP_Text SkillpointsText;
     public VerticalLayoutGroup ActionOrderUI;
     public VerticalLayoutGroup ActionHistoryUI;
     public CharacterGridPiece ActionOrderUIPrefab;
 
     //Private
     //Runtime
-    private List<ActionCharacter> _actionOrder;
+    private List<RuntimeCharacter> _actionOrder;
     private List<string> _actionHistory;
     private float _latestActionValue = 0;
-    private ActionCharacter _Target;
+    private RuntimeCharacter _Target;
     private Team[] _teams;
 
     public void Awake()
     {
-        _actionOrder = new List<ActionCharacter>();
+        _actionOrder = new List<RuntimeCharacter>();
+        //For now this is hard coded to 2, but is made decently flexible for future plans with more than 2 teams
         _teams = new Team[2];
         for (int i = 0; i < _teams.Length; i++) _teams[i] = new Team();
+        _teams[0].SkillpointsUI = SkillpointsText;
+        _teams[0].EnemyTeam = _teams[1];
+        _teams[1].EnemyTeam = _teams[0];
         foreach (Character character in Allies)
         {
             AddCharacter(character, AllyUI, 0);
@@ -41,6 +48,7 @@ public class Combat : MonoBehaviour
         {
             AddCharacter(character, EnemyUI, 1);
         }
+        foreach (RuntimeCharacter character in _actionOrder) character.Invoke(Triggers.StartOfCombat, character);
         SortActionOrder();
     }
 
@@ -52,20 +60,22 @@ public class Combat : MonoBehaviour
         }
     }
 
-    public void AddCharacter(Character character, HorizontalLayoutGroup UIparent, int teamId)
+    public RuntimeCharacter AddCharacter(Character @base, HorizontalLayoutGroup UIparent, int teamId)
     {
         //Logic
-        ActionCharacter action = new ActionCharacter(character, _latestActionValue, teamId, _teams[teamId], _teams[teamId].Count);
-        _actionOrder.Add(action);
-        _teams[teamId].Add(action);
+        RuntimeCharacter character = new RuntimeCharacter(@base, _latestActionValue, teamId, _teams[teamId], _teams[teamId].Count);
+        _actionOrder.Add(character);
+        _teams[teamId].Add(character);
 
         //UI
         CombatCharacterPiece piece = Instantiate(CharacterButtonUIPrefab, UIparent.transform);
-        piece.Apply(character, action, this);
+        piece.Apply(@base, character, this);
         piece.AddOnCharacterClickListener(Target);
+
+        return character;
     }
 
-    public void DoTurn(ActionCharacter character)
+    public void DoTurn(RuntimeCharacter character)
     {
         character.DoTurn();
         SortActionOrder();
@@ -80,21 +90,21 @@ public class Combat : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        foreach (ActionCharacter character in _actionOrder)
+        foreach (RuntimeCharacter character in _actionOrder)
         {
             CharacterGridPiece piece = Instantiate(ActionOrderUIPrefab, ActionOrderUI.transform);
             piece.Apply(character.BasedOfCharacter, OpenActionOrderInfo);
         }
 
         //string debug = "ActionOrder: ";
-        //foreach (ActionCharacter action in ActionOrder)
+        //foreach (RuntimeCharacter action in ActionOrder)
         //{
         //    debug += $"(Name:{action.Character.BasedOfCharacter.name}, ActionValue:{action.ActionValue}), ";
         //}
         //Debug.Log(debug);
     }
 
-    public void Target(ActionCharacter character, CombatCharacterPiece piece)
+    public void Target(RuntimeCharacter character, CombatCharacterPiece piece)
     {
         _Target = character;
         SelectedCharacterUI.position = piece.transform.position;
@@ -105,20 +115,58 @@ public class Combat : MonoBehaviour
 
     }
 
+    public void Talent(RuntimeCharacter character)
+    {
+        foreach (Mechanics passive in character.BasedOfCharacter.Talent.Passives)
+        {
+            foreach (Triggers trigger in passive.Trigger)
+            {
+                foreach(TriggerConditions condition in passive.Condition)
+                {
+                    switch (condition)
+                    {
+                        case TriggerConditions.None:
+                            break;
+                        case TriggerConditions.ImTheCause:
+                            break;
+                        case TriggerConditions.AllyIsTheCause:
+                            break;
+                        case TriggerConditions.EnemyIsTheCause:
+                            break;
+                        case TriggerConditions.ImReceiver:
+                            character.Events[trigger].Add(passive, character);
+                            break;
+                        case TriggerConditions.AllyIsTheReceiver:
+                            foreach (RuntimeCharacter ally in character.Team)
+                            {
+                                if (ally != character) ally.Events[trigger].Add(passive, character);
+                            }
+                            break;
+                        case TriggerConditions.EnemyIsTheReceiver:
+                            character.Team.EnemyTeam.Events[trigger].Add(passive, character);
+                            break;
+                        default:
+                            Debug.LogError($"Unimplemented condition: {condition}, {Enum.GetName(typeof(TriggerConditions), condition)}");
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
     public void Basic()
     {
-        ActionCharacter character = _actionOrder[0];
+        RuntimeCharacter character = _actionOrder[0];
         if (AbilityLogic(character, character.BasedOfCharacter.Basic, _Target))
         {
             character.Team.SkillPoints++;
             DoTurn(character);
         }
-            
     }
 
     public void Skill()
     {
-        ActionCharacter character = _actionOrder[0];
+        RuntimeCharacter character = _actionOrder[0];
         if (character.Team.SkillPoints > 0 && AbilityLogic(character, character.BasedOfCharacter.Skill, _Target))
         {
             character.Team.SkillPoints--;
@@ -126,7 +174,7 @@ public class Combat : MonoBehaviour
         }
     }
 
-    public void Ult(ActionCharacter character)
+    public void Ult(RuntimeCharacter character)
     {
         if (character.Energy >= character.BasedOfCharacter.Ultimate.EnergyCost && AbilityLogic(character, character.BasedOfCharacter.Ultimate, _Target))
         {
@@ -135,11 +183,11 @@ public class Combat : MonoBehaviour
         }
     }
 
-    public void Ult2(ActionCharacter character)
+    public void Ult2(RuntimeCharacter character)
     {
         if (!(character.BasedOfCharacter.Ultimate is DualUlt)) return;
         Ultimate dualUlt = ((DualUlt)character.BasedOfCharacter.Ultimate).Ult2;
-        if (character.Energy >= character.BasedOfCharacter.Ultimate.EnergyCost 
+        if (character.Energy >= character.BasedOfCharacter.Ultimate.EnergyCost
             && AbilityLogic(character, dualUlt, _Target))
         {
             character.Energy -= dualUlt.EnergyCost;
@@ -147,124 +195,238 @@ public class Combat : MonoBehaviour
         }
     }
 
-    public bool AbilityLogic(ActionCharacter character, Ability ability, ActionCharacter target)
+    public bool AbilityLogic(RuntimeCharacter character, Ability ability, RuntimeCharacter target)
     {
+        character.Invoke(Triggers.BeforeAttack);
         character.Energy += ability.EnergyGeneration;
-        List<ActionCharacter> targets = new List<ActionCharacter>();
+        List<RuntimeCharacter> targets = GetTargets(character, ability.Targets, target);
+        if (targets.Count == 0) return false;
         float amount = character.GetStat(ability.ScalingStat) * ability.ScalingPer / 100 + ability.FlatAmount;
+        MainEffect(character, ability.MainEffect, targets, amount);
+        character.Invoke(Triggers.AfterAttack);
+        return true;
+    }
 
-        switch (ability.Targets)
+    public static List<RuntimeCharacter> GetTargets(RuntimeCharacter character, Targets targetType, RuntimeCharacter target)
+    {
+        List<RuntimeCharacter> targets = new List<RuntimeCharacter>();
+        switch (targetType)
         {
             case Targets.EnemySingle:
-                if (target.TeamId == character.TeamId) return false;
-                targets.Add(target);
+                if (target.TeamId != character.TeamId) targets.Add(target);
                 break;
             case Targets.EnemyArea:
-                if (target.TeamId == character.TeamId) return false;
-                AreaTargeting(target, targets);
+                if (target.TeamId != character.TeamId) AreaTargeting(target, targets);
                 break;
             case Targets.EnemyAll:
-                if (target.TeamId == character.TeamId) return false;
-                foreach (ActionCharacter c in target.Team) targets.Add(c);
+                foreach (RuntimeCharacter c in character.Team.EnemyTeam) targets.Add(c);
                 break;
             case Targets.Self:
                 targets.Add(character);
                 break;
             case Targets.AllySingle:
-                if (_Target.TeamId != character.TeamId) return false;
-                targets.Add(target);
+                if (target.TeamId == character.TeamId) targets.Add(target);
                 break;
             case Targets.AllyOthers:
-                foreach (ActionCharacter c in character.Team) targets.Add(c);
+                foreach (RuntimeCharacter c in character.Team) targets.Add(c);
                 targets.Remove(character);
                 break;
             case Targets.AllyArea:
-                if (_Target.TeamId != character.TeamId) return false;
-                AreaTargeting(character, targets);
+                if (target.TeamId == character.TeamId) AreaTargeting(character, targets);
                 break;
             case Targets.AllyAll:
-                foreach (ActionCharacter c in character.Team) targets.Add(c);
+                foreach (RuntimeCharacter c in character.Team) targets.Add(c);
                 break;
             default:
                 Debug.LogError("Unimplemented ability target type");
                 break;
         }
-        MainEffect(character, ability.MainEffect, targets, amount);
-        return true;
+        return targets;
     }
 
-    public void AreaTargeting(ActionCharacter target, List<ActionCharacter> list)
+    public static void AreaTargeting(RuntimeCharacter target, List<RuntimeCharacter> list)
     {
         list.Add(target);
         if (target.Position > 0) list.Add(target.Team[target.Position - 1]);
         if (target.Position < target.Team.Count - 1) list.Add(target.Team[target.Position + 1]);
     }
 
-    public void MainEffect(ActionCharacter character, OtherEffects effect, List<ActionCharacter> targets, float amount)
+    public static void MainEffect(RuntimeCharacter cause, OtherEffects effect, List<RuntimeCharacter> targets, float amount)
     {
         switch (effect)
         {
             case OtherEffects.None:
                 break;
             case OtherEffects.Heal:
-                foreach (ActionCharacter target in targets) target.CurrentHP += amount;
+                foreach (RuntimeCharacter target in targets)
+                {
+                    target.CurrentHP += amount;
+                    target.Invoke(Triggers.Heal, cause);
+                }
                 break;
             case OtherEffects.Buff:
                 break;
             case OtherEffects.Energy:
-                foreach (ActionCharacter target in targets) target.Energy += amount;
+                foreach (RuntimeCharacter target in targets)
+                {
+                    target.Energy += amount;
+                    target.Invoke(Triggers.EnergyChange, cause);
+                }
                 break;
             case OtherEffects.DealDMG:
-                foreach (ActionCharacter target in targets) target.Invoke(Triggers.BeforeTakingDamage);
-                foreach (ActionCharacter target in targets)
+                foreach (RuntimeCharacter target in targets) target.Invoke(Triggers.BeforeTakingDamage, cause);
+                foreach (RuntimeCharacter target in targets)
                 {
-                    DoDamage(character, target, amount);
-                    target.Invoke(Triggers.AfterTakingDamage);
+                    DoDamage(cause, target, amount);
+                    target.Invoke(Triggers.AfterTakingDamage, cause);
                 }
                 break;
         }
     }
 
-    public static void DoDamage(RuntimeCharacter character, RuntimeCharacter target, float baseDMG)
+    public static void DoDamage(RuntimeCharacter cause, RuntimeCharacter receiver, float baseDMG)
     {
-        float crit = Crit(character.Adv.CRIT_Rate / 100, character.Adv.CRIT_DMG / 100);
+        float crit = Crit(cause.Adv.CRIT_Rate / 100, cause.Adv.CRIT_DMG / 100);
         float dmg = DMGMultiplier(0); //TODO
         float weaken = WeakenMultiplier(0); //TODO
-        float def = DEFMultiplier(character.LVL, target.Base.DEF, 0, 0); //TODO
+        float def = DEFMultiplier(cause.LVL, receiver.Base.DEF, 0, 0); //TODO
         float res = RESMultiplier(0, 0); //TODO
         float vulnerability = VulnerabilityMultiplier(0); //TODO
         float dmgReduction = DMGReductionMultiplier(new List<float>()); //TODO
         float broken = BrokenMultiplier(false); //TODO
         float total = baseDMG * crit * dmg * weaken * def * res * vulnerability * dmgReduction * broken;
-        target.CurrentHP -= total;
+        receiver.CurrentHP -= total;
     }
 
-    public class ActionCharacter : RuntimeCharacter
+    public class Team : List<RuntimeCharacter>
     {
-        public float ActionValue;
-        public int TeamId;
-        public int Position;
-        public Team Team;
-
-        public ActionCharacter(Character character, float actionValue, int teamId, Team team, int position) : base(character)
+        public int SkillPoints
         {
-            ActionValue = actionValue;
-            DoTurn();
-            TeamId = teamId;
-            Team = team;
-            Position = position;
+            get { return _skillPoints; }
+            set
+            {
+                _skillPoints = Mathf.Min(value, MaxSkillPoints);
+                if (SkillpointsUI) SkillpointsUI.text = $"{_skillPoints}/{MaxSkillPoints}";
+            }
         }
-
-        public void DoTurn()
-        {
-            ActionValue += 10000 / Final.SPD;
-        }
-    }
-
-    public class Team : List<ActionCharacter>
-    {
-        public int SkillPoints { get { return _skillPoints; } set { _skillPoints = Mathf.Min(value, MaxSkillPoints); } }
         public int MaxSkillPoints = 5;
         private int _skillPoints = 3;
+
+        public TMP_Text SkillpointsUI;
+
+        /// <summary>Each event has Reciever first and cause as the second variable</summary>
+        public CharacterEvents Events;
+
+        public Team EnemyTeam;
+
+        public Team()
+        {
+            Events = new CharacterEvents();
+        }
+    }
+
+    public class CharacterEvents : Dictionary<Triggers, CharacterAction>
+    {
+        public CharacterEvents()
+        {
+            Triggers[] triggers = (Triggers[])Enum.GetValues(typeof(Triggers));
+            foreach (Triggers trigger in triggers)
+            {
+                Add(trigger, new CharacterAction());
+            }
+        }
+        public void Invoke(Triggers trigger, RuntimeCharacter receiver, RuntimeCharacter cause)
+        {
+            this[trigger].Invoke(receiver, cause);
+        }
+    }
+
+    public class CharacterAction : List<Action<RuntimeCharacter, RuntimeCharacter>>
+    {
+        public List<CharacterMechanicOnTrigger> Mechanics;
+
+        public CharacterAction()
+        {
+            Mechanics = new List<CharacterMechanicOnTrigger>();
+        }
+
+        public void Add(Mechanics mechanic, RuntimeCharacter source)
+        {
+            Mechanics.Add(new CharacterMechanicOnTrigger(mechanic, source));
+        }
+
+        public void Invoke(RuntimeCharacter receiver, RuntimeCharacter cause)
+        {
+            foreach (Action<RuntimeCharacter, RuntimeCharacter> action in this)
+            {
+                action.Invoke(receiver, cause);
+            }
+            foreach(CharacterMechanicOnTrigger mechanic in Mechanics)
+            {
+                mechanic.Invoke(receiver, cause);
+            }
+        }
+
+        public class CharacterMechanicOnTrigger
+        {
+            private Mechanics _mechanic;
+            private RuntimeCharacter _source;
+
+            public CharacterMechanicOnTrigger(Mechanics mechanic, RuntimeCharacter source)
+            {
+                _mechanic = mechanic;
+                _source = source;
+            }
+
+            public void Invoke(RuntimeCharacter receiver, RuntimeCharacter cause)
+            {
+                if (CorrectCause(cause)) Effect(Combat.GetTargets(_source, _mechanic.target, null));
+            }
+
+            private bool CorrectCause(RuntimeCharacter cause)
+            {
+                foreach (TriggerConditions condition in _mechanic.Condition)
+                {
+                    switch (condition)
+                    {
+                        case TriggerConditions.None:
+                            break;
+                        case TriggerConditions.ImTheCause:
+                            if (_source == cause) return true;
+                            break;
+                        case TriggerConditions.AllyIsTheCause:
+                            foreach (RuntimeCharacter ally in _source.Team)
+                            {
+                                if (ally != _source && ally == cause) return true;
+                            }
+                            break;
+                        case TriggerConditions.EnemyIsTheCause:
+                            foreach (RuntimeCharacter enemy in _source.Team.EnemyTeam)
+                            {
+                                if (enemy == cause) return true;
+                            }
+                            break;
+                        case TriggerConditions.ImReceiver:
+                            break;
+                        case TriggerConditions.AllyIsTheReceiver:
+                            break;
+                        case TriggerConditions.EnemyIsTheReceiver:
+                            break;
+                        default:
+                            Debug.LogError($"Unimplemented condition: {condition}, {Enum.GetName(typeof(TriggerConditions), condition)}");
+                            break;
+                    }
+                }
+                return false;
+            }
+
+            private void Effect(List<RuntimeCharacter> characters)
+            {
+                foreach(var character in characters)
+                {
+                    character.Effects.Add(_mechanic.effect);
+                }
+            }
+        }
     }
 }

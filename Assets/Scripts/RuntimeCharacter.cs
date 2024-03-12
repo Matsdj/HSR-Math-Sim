@@ -3,25 +3,30 @@ using System.Collections;
 using System.Collections.Generic;
 using Types;
 using UnityEngine;
+using static Combat;
 
 public class RuntimeCharacter : RuntimeStats
 {
     public readonly Character BasedOfCharacter;
-    public List<Effect> Buffs = new List<Effect>();
 
-    public Dictionary<Triggers, List<Action<RuntimeCharacter>>> Events;
-    public override float Energy { get => base.Energy; set { base.Energy = value; Invoke(Triggers.EnergyChange); } }
+    public float ActionValue;
+    public int TeamId;
+    public int Position;
+    public Team Team;
+    public CharacterEvents Events;
 
-    public RuntimeCharacter(Character basedOfCharacter) : base(basedOfCharacter)
+    public RuntimeEffects Effects { get => _effects; }
+    private RuntimeEffects _effects;
+
+    public RuntimeCharacter(Character character, float actionValue, int teamId, Team team, int position) : base(character)
     {
-        BasedOfCharacter = basedOfCharacter;
-
-        Triggers[] triggers = (Triggers[])Enum.GetValues(typeof(Triggers));
-        Events = new Dictionary<Triggers, List<Action<RuntimeCharacter>>>();
-        foreach (Triggers trigger in triggers)
-        {
-            Events.Add(trigger, new List<Action<RuntimeCharacter>>());
-        }
+        BasedOfCharacter = character;
+        ActionValue = actionValue;
+        DoTurn();
+        TeamId = teamId;
+        Team = team;
+        Position = position;
+        Events = new CharacterEvents();
     }
 
     public float GetStat(Stats stat)
@@ -29,7 +34,7 @@ public class RuntimeCharacter : RuntimeStats
         switch (stat)
         {
             case Stats.None:
-                Debug.LogError("None is not a valid Stat");
+                //Debug.LogError("None is not a valid Stat");
                 return 0;
             case Stats.HP:
                 return Final.HP;
@@ -64,11 +69,34 @@ public class RuntimeCharacter : RuntimeStats
         return 0;
     }
 
-    public void Invoke(Triggers trigger)
+    public void DoTurn()
     {
-        foreach(Action<RuntimeCharacter> action in Events[trigger])
+        ActionValue += 10000 / Final.SPD;
+    }
+
+    public void Invoke(Triggers trigger, RuntimeCharacter cause = null)
+    {
+        if (cause == null) cause = this;
+        Events.Invoke(trigger, this, cause);
+        Team.Events.Invoke(trigger, this, cause);
+    }
+
+    public class RuntimeEffects : Dictionary<Effect, RuntimeEffect>
+    {
+        private readonly RuntimeCharacter _character;
+
+        public RuntimeEffects(RuntimeCharacter character)
         {
-            action.Invoke(this);
+            _character = character;
+        }
+
+        public void Add(Effect effect)
+        {
+            if (ContainsKey(effect))
+            {
+                this[effect].Apply();
+            }
+            else Add(effect, new RuntimeEffect(effect, _character, Remove));
         }
     }
 }

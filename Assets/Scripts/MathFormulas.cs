@@ -10,10 +10,10 @@ public class MathFormulas
     /// <param name="skillMultiplier">this is the percentage value you can find in the skill description (Deal DMG equal to XX%)</param>
     /// <param name="extraMultiplier">this appears only on some skills, like Dan Heng's Ultimate that deals additional damage to slowed enemies</param>
     /// <param name="scalingAttribute">this is the attribute the skill scales off - in most cases it's ATK</param>
-    /// <param name="extraDMG">this is the flat additional damage that appears on some skills</param>
-    public static float BaseDMG(float skillMultiplier, float extraMultiplier, float scalingAttribute, float extraDMG)
+    /// <param name="extraFlatAmount">this is the flat additional damage that appears on some skills</param>
+    public static float BaseAmount(float skillMultiplier, float extraMultiplier, float scalingAttribute, float extraFlatAmount)
     {
-        return (skillMultiplier + extraMultiplier) * scalingAttribute + extraDMG;
+        return (skillMultiplier + extraMultiplier) * scalingAttribute + extraFlatAmount;
     }
 
     /// <summary>

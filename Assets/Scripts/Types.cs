@@ -94,12 +94,11 @@ namespace Types
     {
         //All this triggers will have events that pass through 2 values: The Cause, The receiver (List)
         Always, //Always active even outside of combat
-        StartOfCombat, //Is an exception because there will be no cause only inflicted.
+        StartOfCombat,
         BeforeAttack,
         AfterAttack,
         AfterDefeatEnemy,
         EnemyEnterField,
-        EnemyLeaveField,
         WeaknessBreak,
         BeforeUlt,
         AfterUlt,
@@ -107,7 +106,10 @@ namespace Types
         AfterSkill,
         BeforeTakingDamage,
         AfterTakingDamage,
-        EnergyChange
+        EnergyChange,
+        Heal,
+        OnTurnStart,
+        OnTurnEnd,
     }
 
     public enum TriggerConditions
@@ -117,7 +119,7 @@ namespace Types
         AllyIsTheCause,
         EnemyIsTheCause,
         ImReceiver,
-        AllyIsTheReceiver,
+        AllyIsTheReceiver, //Excluding yourself
         EnemyIsTheReceiver
     }
 

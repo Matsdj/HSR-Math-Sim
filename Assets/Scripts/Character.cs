@@ -18,8 +18,8 @@ public class Character : ScriptableObject
     public Ability Basic;
     public Ability Skill;
     public Ultimate Ultimate;
-    public Ability Talent;
-    public Ability Technique;
+    public Passive Talent;
+    public Passive Technique;
 
     public LightCone LightCone;
     public Relic[] Relics = new Relic[6];

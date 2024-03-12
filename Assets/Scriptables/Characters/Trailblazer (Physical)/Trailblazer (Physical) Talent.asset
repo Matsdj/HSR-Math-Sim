@@ -9,21 +9,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e7443473d67edb41acabc939969cba9, type: 3}
+  m_Script: {fileID: 11500000, guid: 2788f7e609096364d8faa6aa6641e1fb, type: 3}
   m_Name: Trailblazer (Physical) Talent
   m_EditorClassIdentifier: 
   EnergyGeneration: 0
   AbilityType: 4
-  Targets: 0
-  MainEffect: 0
+  Targets: 3
+  MainEffect: 2
   ScalingStat: 0
   ScalingPer: 0
   ScalingPerReductionForNonMainTargets: 0
   FlatAmount: 0
   ApplyEffectToTarget: {fileID: 0}
-  Passive:
-    Trigger: 
-    Condition: 
+  Passives:
+  - Trigger: 07000000
+    Condition: 0600000001000000
     TargetNeedsEffects: []
     excludeIfEffect: 0
     StatCondition: 0
@@ -32,5 +32,17 @@ MonoBehaviour:
     PerAmount: 0
     UseAnd: 0
     target: 0
-    effect: {fileID: 0}
-    effectStackCountInflicted: 1
+    effect: {fileID: 11400000, guid: e3ce6c46e2acfb642a8244ac58694346, type: 2}
+    effectStackCountInflicted: 0
+  - Trigger: 01000000
+    Condition: 01000000
+    TargetNeedsEffects: []
+    excludeIfEffect: 0
+    StatCondition: 0
+    AboveOrBelow: 0
+    FlatAmount: 0
+    PerAmount: 0
+    UseAnd: 0
+    target: 3
+    effect: {fileID: 11400000, guid: e3ce6c46e2acfb642a8244ac58694346, type: 2}
+    effectStackCountInflicted: 0

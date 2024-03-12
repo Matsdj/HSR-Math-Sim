@@ -7,7 +7,7 @@ using Types;
 public class Ability : ScriptableObject
 {
     public int EnergyGeneration = 20;
-    public AbilityType AbilityType;
+    public AbilityType AbilityType; //Might be redundent
     public Targets Targets;
     public OtherEffects MainEffect;
     public Stats ScalingStat;
@@ -15,6 +15,4 @@ public class Ability : ScriptableObject
     public float ScalingPerReductionForNonMainTargets;
     public float FlatAmount;
     public Effect ApplyEffectToTarget;
-    [Tooltip("Talents and Techniques need mechanics")]
-    public Mechanics Passive;
 }
