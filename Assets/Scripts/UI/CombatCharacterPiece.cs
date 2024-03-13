@@ -55,6 +55,8 @@ public class CombatCharacterPiece : CharacterGridPiece
     public override void OnClick()
     {
         _RuntimeCharacterEvent.Invoke(_RuntimeCharacter, this);
+        _RuntimeCharacter.DumpCharacterInfo();
+
     }
 
     public void OnClickUlt()

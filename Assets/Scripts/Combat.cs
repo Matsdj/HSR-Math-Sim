@@ -126,7 +126,7 @@ public class Combat : MonoBehaviour
         {
             foreach (Triggers trigger in passive.Trigger)
             {
-                Debug.Log($"Adding Talent to Trigger:{Enum.GetName(typeof(Triggers), trigger)}");
+                //Debug.Log($"Adding Talent to Trigger:{Enum.GetName(typeof(Triggers), trigger)}");
                 foreach (TriggerConditions condition in passive.TriggerCondition)
                 {
                     switch (condition)
@@ -149,7 +149,7 @@ public class Combat : MonoBehaviour
                             Debug.LogError($"Unimplemented condition: {condition}, {Enum.GetName(typeof(TriggerConditions), condition)}");
                             break;
                     }
-                    Debug.Log($"{character.BasedOfCharacter.name} now has {character.Events[trigger].Mechanics.Count} Mechanics added to it's CharacterActions. Condition:{condition}");
+                    //Debug.Log($"{character.BasedOfCharacter.name} now has {character.Events[trigger].Mechanics.Count} Mechanics added to it's CharacterActions. Condition:{condition}");
                 }
                 
             }
@@ -311,6 +311,7 @@ public class Combat : MonoBehaviour
         float total = baseDMG * crit * dmg * weaken * def * res * vulnerability * dmgReduction * broken;
         float excess = receiver.DoDamageToShield(total);
         receiver.CurrentHP -= excess;
+        Debug.Log($"Total DMG:{total}, DMG not blocked by shield:{excess}");
     }
 
     public class Team : List<RuntimeCharacter>
@@ -395,7 +396,7 @@ public class Combat : MonoBehaviour
 
             public void Invoke(RuntimeCharacter receiver, RuntimeCharacter cause)
             {
-                Debug.Log($"Invoking Mechanic from:{_source.BasedOfCharacter.name}");
+                //Debug.Log($"Invoking Mechanic from:{_source.BasedOfCharacter.name}");
                 if (CorrectCause(cause)) Effect(GetTargets(_source, _mechanic.target, null));
             }
 

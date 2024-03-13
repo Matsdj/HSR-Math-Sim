@@ -40,7 +40,7 @@ public class RuntimeCharacter : RuntimeStats
     public void Invoke(Triggers trigger, RuntimeCharacter cause = null)
     {
         if (cause == null) cause = this;
-        Debug.Log($"Invoking {Events[trigger].Mechanics.Count} mechanics. Trigger: {Enum.GetName(typeof(Triggers), trigger)} from:{BasedOfCharacter.name}");
+        //Debug.Log($"Invoking {Events[trigger].Mechanics.Count} mechanics. Trigger: {Enum.GetName(typeof(Triggers), trigger)} from:{BasedOfCharacter.name}");
         Events.Invoke(trigger, this, cause);
         Team.Events.Invoke(trigger, this, cause);
     }
@@ -61,6 +61,27 @@ public class RuntimeCharacter : RuntimeStats
             }
         }
         return excessDMG;
+    }
+
+    public void DumpCharacterInfo()
+    {
+        string log = "";
+        log += BasedOfCharacter.name + "\n";
+        foreach(Stats stat in Enum.GetValues(typeof(Stats)))
+        {
+            log += $"[{EnumName(stat)}:{GetStat(stat)}], ";
+        }
+        log += "\n";
+        foreach(RuntimeEffect effect in Effects.Values)
+        {
+            log += $"[{effect.Base.name},{EnumName(effect.Base.StatToBuff)}:[Flat:{effect.Base.FlatIncrease}],[Duration:{effect.Duration}]], ";
+        }
+        Debug.Log(log);
+    }
+
+    public string EnumName(Stats stat)
+    {
+        return Enum.GetName(typeof(Stats), stat);
     }
 
     public class RuntimeEffects : Dictionary<Effect, RuntimeEffect>
