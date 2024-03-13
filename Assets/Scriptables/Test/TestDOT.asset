@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: TestDOT
   m_EditorClassIdentifier: 
   StatToBuff: 0
-  OtherEffect: 5
+  OtherEffect: 2
   OtherEffectTriggers: 10000000
-  DMG_Type: 2
+  DMG_Type: 0
   FlatIncrease: 100
   PerIncrease: 0
   ScalesOf: 0

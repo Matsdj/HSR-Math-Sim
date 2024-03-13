@@ -31,7 +31,6 @@ public class Effect : ScriptableObject
 public class RuntimeEffect
 {
     public readonly Effect Base;
-
     public int Duration { get => _duration; }
     public int StackCount { get => _stackCount; }
     private int _duration;
@@ -42,13 +41,27 @@ public class RuntimeEffect
     public RuntimeEffect(Effect @base, RuntimeCharacter character, Func<Effect, bool> removeSelfAction)
     {
         Base = @base;
-        _duration = Base.Duration;
-        _stackCount = 1;
+        Apply();
         _character = character;
 
+        //Countdown
         if (Base.CountDownAtStart) character.Events[Triggers.OnTurnStart].Add(DurationCountDown);
         if (Base.CountDownAtEnd) character.Events[Triggers.OnTurnEnd].Add(DurationCountDown);
 
+        //Statbuff
+        if (Base.StatToBuff != Stats.None)
+        {
+            if (Base.FlatIncrease != 0) _character.GetStatReference(Base.StatToBuff, _character.Flat) += Base.FlatIncrease;
+            if (Base.PerIncrease != 0) _character.GetStatReference(Base.StatToBuff, _character.Per) += Base.PerIncrease;
+        }
+        
+
+        //Trigger
+        if (Base.OtherEffectTriggers.Length == 0)
+        {
+            DoOtherEffect();
+        }
+        else
         foreach(Triggers trigger in Base.OtherEffectTriggers)
         {
             character.Events[trigger].Add(DoOtherEffect);
@@ -63,16 +76,18 @@ public class RuntimeEffect
         if (_stackCount < Base.StackMax) _stackCount++;
     }
 
-    private void DurationCountDown(RuntimeCharacter receiver, RuntimeCharacter cause)
+    private void DurationCountDown(RuntimeCharacter receiver = null, RuntimeCharacter cause = null)
     {
+        Debug.Log($"Count down effect {Base.name}");
         _duration--;
         if (_duration == 0) RemoveSelf();
     }
 
-    private void DoOtherEffect(RuntimeCharacter receiver, RuntimeCharacter cause)
+    private void DoOtherEffect(RuntimeCharacter receiver = null, RuntimeCharacter cause = null)
     {
+        Debug.Log($"Triggering effect {Base.name}");
         float amount = MathFormulas.BaseAmount(Base.PerIncreaseScalingStat,0,_character.GetStat(Base.ScalesOf), Base.FlatIncrease);
-        Combat.MainEffect(_character, Base.OtherEffect, new List<RuntimeCharacter>() { _character }, amount);
+        Combat.MainEffect(_character, Base.OtherEffect, new List<RuntimeCharacter>() { _character }, amount, this);
 
         if (Base.LoseStackOnTrigger)
         {
@@ -81,10 +96,22 @@ public class RuntimeEffect
         }
     }
 
-    private void RemoveSelf()
+    public void RemoveSelf()
     {
         if (Base.CountDownAtStart) _character.Events[Triggers.OnTurnStart].Remove(DurationCountDown);
         if (Base.CountDownAtEnd) _character.Events[Triggers.OnTurnEnd].Remove(DurationCountDown);
+
+        if (Base.StatToBuff != Stats.None)
+        {
+            if (Base.FlatIncrease != 0) _character.GetStatReference(Base.StatToBuff, _character.Flat) -= Base.FlatIncrease;
+            if (Base.PerIncrease != 0) _character.GetStatReference(Base.StatToBuff, _character.Per) -= Base.PerIncrease;
+        }
+
+        if (Base.OtherEffect == OtherEffects.Shield)
+        {
+            _character.Shields.Remove(this);
+        }
+
         foreach (Triggers trigger in Base.OtherEffectTriggers)
         {
             _character.Events[trigger].Remove(DoOtherEffect);

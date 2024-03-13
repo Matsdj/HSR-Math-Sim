@@ -7,7 +7,8 @@ public class Mechanics
 {
     [Tooltip("If it doesn't have a trigger the mechanic is ignored. If the trigger is None its always active")]
     public Triggers[] Trigger;
-    public TriggerConditions[] Condition;
+    public TriggerConditions[] TriggerCondition;
+    public CauseConditions[] CauseCondition;
     public Effect[] TargetNeedsEffects;
     [Tooltip("This does not trigger if the target has the filled in effect in TargetNeedsEffects")]
     public bool excludeIfEffect;

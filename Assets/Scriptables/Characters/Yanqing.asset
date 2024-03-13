@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Yanqing
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 124bba5cf14852e49862f3a59f48c4a9, type: 3}
+  path: 0
+  element: 0
   LVL: 1
   Ascension: 0
   baseStats:
@@ -25,9 +27,23 @@ MonoBehaviour:
     CRIT_DMG: 50
     BreakEffect: 0
     OutgoingHealingBoost: 0
-    MaxEnergy: 140
     EnergyRegenerationRate: 0
     EffectHitRate: 0
     EffectRES: 0
+    MaxEnergy: 140
     Aggro: 75
   Rarity: 5
+  Basic: {fileID: 0}
+  Skill: {fileID: 0}
+  Ultimate: {fileID: 0}
+  Talent: {fileID: 0}
+  Technique: {fileID: 0}
+  LightCone: {fileID: 0}
+  Relics:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  audio: {fileID: 0}

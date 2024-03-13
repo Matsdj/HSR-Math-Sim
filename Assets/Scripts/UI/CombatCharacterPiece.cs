@@ -40,14 +40,14 @@ public class CombatCharacterPiece : CharacterGridPiece
     private void UpdateHealthBar(RuntimeCharacter reciever, RuntimeCharacter cause)
     {
         float x = reciever.CurrentHP / reciever.Final.HP;
-        Debug.Log($"HP:{reciever.CurrentHP}, MaxHP:{reciever.Final.HP}, {x}");
+        //Debug.Log($"HP:{reciever.CurrentHP}, MaxHP:{reciever.Final.HP}, {x}");
         HealthBar.localScale = new Vector3(Mathf.Clamp(x, 0, 1), 1, 1);
     }
 
     private void ShowUltButton(RuntimeCharacter reciever, RuntimeCharacter cause)
     {
         bool active = reciever.Energy >= reciever.Adv.MaxEnergy;
-        Debug.Log($"Energy:{reciever.Energy}, Max:{reciever.Adv.MaxEnergy}");
+        //Debug.Log($"Energy:{reciever.Energy}, Max:{reciever.Adv.MaxEnergy}");
         UltButton.gameObject.SetActive(active);
         if (_RuntimeCharacter.BasedOfCharacter.Ultimate is DualUlt) UltButton2.gameObject.SetActive(active);
     }

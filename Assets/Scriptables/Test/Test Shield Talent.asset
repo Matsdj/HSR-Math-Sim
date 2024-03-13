@@ -10,32 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2788f7e609096364d8faa6aa6641e1fb, type: 3}
-  m_Name: Trailblazer (Physical) Talent
+  m_Name: Test Shield Talent
   m_EditorClassIdentifier: 
-  EnergyGeneration: 0
+  EnergyGeneration: 20
   AbilityType: 4
   Targets: 3
-  MainEffect: 2
+  MainEffect: 0
   ScalingStat: 0
   ScalingPer: 0
   ScalingPerReductionForNonMainTargets: 0
   FlatAmount: 0
   ApplyEffectToTarget: {fileID: 0}
   Passives:
-  - Trigger: 06000000
-    TriggerCondition: 03000000
-    CauseCondition: 01000000
-    TargetNeedsEffects: []
-    excludeIfEffect: 0
-    StatCondition: 0
-    AboveOrBelow: 0
-    FlatAmount: 0
-    PerAmount: 0
-    UseAnd: 0
-    target: 0
-    effect: {fileID: 11400000, guid: e3ce6c46e2acfb642a8244ac58694346, type: 2}
-    effectStackCountInflicted: 1
-  - Trigger: 010000000f000000
+  - Trigger: 01000000
     TriggerCondition: 01000000
     CauseCondition: 01000000
     TargetNeedsEffects: []
@@ -46,5 +33,5 @@ MonoBehaviour:
     PerAmount: 0
     UseAnd: 0
     target: 3
-    effect: {fileID: 11400000, guid: d9704f12f975d6e4a938ead5036ff656, type: 2}
+    effect: {fileID: 11400000, guid: ebe7402e75d99c746975c19ac7c6d110, type: 2}
     effectStackCountInflicted: 1

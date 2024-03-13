@@ -66,6 +66,8 @@ public class Combat : MonoBehaviour
         RuntimeCharacter character = new RuntimeCharacter(@base, _latestActionValue, teamId, _teams[teamId], _teams[teamId].Count);
         _actionOrder.Add(character);
         _teams[teamId].Add(character);
+        character.Invoke(Triggers.EnemyEnterField);
+        TalentSetup(character);
 
         //UI
         CombatCharacterPiece piece = Instantiate(CharacterButtonUIPrefab, UIparent.transform);
@@ -77,8 +79,10 @@ public class Combat : MonoBehaviour
 
     public void DoTurn(RuntimeCharacter character)
     {
+        character.Invoke(Triggers.OnTurnEnd);
         character.DoTurn();
         SortActionOrder();
+        _actionOrder[0].Invoke(Triggers.OnTurnStart);
     }
 
     public void SortActionOrder()
@@ -115,23 +119,19 @@ public class Combat : MonoBehaviour
 
     }
 
-    public void Talent(RuntimeCharacter character)
+    public void TalentSetup(RuntimeCharacter character)
     {
+        if (character.BasedOfCharacter.Talent == null) return;
         foreach (Mechanics passive in character.BasedOfCharacter.Talent.Passives)
         {
             foreach (Triggers trigger in passive.Trigger)
             {
-                foreach(TriggerConditions condition in passive.Condition)
+                Debug.Log($"Adding Talent to Trigger:{Enum.GetName(typeof(Triggers), trigger)}");
+                foreach (TriggerConditions condition in passive.TriggerCondition)
                 {
                     switch (condition)
                     {
                         case TriggerConditions.None:
-                            break;
-                        case TriggerConditions.ImTheCause:
-                            break;
-                        case TriggerConditions.AllyIsTheCause:
-                            break;
-                        case TriggerConditions.EnemyIsTheCause:
                             break;
                         case TriggerConditions.ImReceiver:
                             character.Events[trigger].Add(passive, character);
@@ -149,7 +149,9 @@ public class Combat : MonoBehaviour
                             Debug.LogError($"Unimplemented condition: {condition}, {Enum.GetName(typeof(TriggerConditions), condition)}");
                             break;
                     }
+                    Debug.Log($"{character.BasedOfCharacter.name} now has {character.Events[trigger].Mechanics.Count} Mechanics added to it's CharacterActions. Condition:{condition}");
                 }
+                
             }
         }
     }
@@ -176,34 +178,42 @@ public class Combat : MonoBehaviour
 
     public void Ult(RuntimeCharacter character)
     {
-        if (character.Energy >= character.BasedOfCharacter.Ultimate.EnergyCost && AbilityLogic(character, character.BasedOfCharacter.Ultimate, _Target))
-        {
-            character.Energy -= character.BasedOfCharacter.Ultimate.EnergyCost;
-            DoTurn(character);
-        }
+        BaseUlt(character, character.BasedOfCharacter.Ultimate);
     }
 
     public void Ult2(RuntimeCharacter character)
     {
         if (!(character.BasedOfCharacter.Ultimate is DualUlt)) return;
         Ultimate dualUlt = ((DualUlt)character.BasedOfCharacter.Ultimate).Ult2;
-        if (character.Energy >= character.BasedOfCharacter.Ultimate.EnergyCost
-            && AbilityLogic(character, dualUlt, _Target))
+        BaseUlt(character, dualUlt);
+    }
+
+    private void BaseUlt(RuntimeCharacter character, Ultimate ultimate)
+    {
+
+        if (character.Energy >= ultimate.EnergyCost && AbilityLogic(character, ultimate, _Target))
         {
-            character.Energy -= dualUlt.EnergyCost;
-            DoTurn(character);
+            character.Energy -= ultimate.EnergyCost;
         }
     }
 
     public bool AbilityLogic(RuntimeCharacter character, Ability ability, RuntimeCharacter target)
     {
-        character.Invoke(Triggers.BeforeAttack);
         character.Energy += ability.EnergyGeneration;
         List<RuntimeCharacter> targets = GetTargets(character, ability.Targets, target);
         if (targets.Count == 0) return false;
+        //Before triggers
+        character.Invoke(Triggers.BeforeAttack);
+        if (ability.AbilityType == AbilityType.Skill) character.Invoke(Triggers.BeforeUlt);
+        if (ability.AbilityType == AbilityType.Ultimate) character.Invoke(Triggers.BeforeUlt);
+        //Do Effect
         float amount = character.GetStat(ability.ScalingStat) * ability.ScalingPer / 100 + ability.FlatAmount;
         MainEffect(character, ability.MainEffect, targets, amount);
+        //After triggers
         character.Invoke(Triggers.AfterAttack);
+        if (ability.AbilityType == AbilityType.Skill) character.Invoke(Triggers.AfterSkill);
+        if (ability.AbilityType == AbilityType.Ultimate) character.Invoke(Triggers.AfterUlt);
+
         return true;
     }
 
@@ -251,7 +261,7 @@ public class Combat : MonoBehaviour
         if (target.Position < target.Team.Count - 1) list.Add(target.Team[target.Position + 1]);
     }
 
-    public static void MainEffect(RuntimeCharacter cause, OtherEffects effect, List<RuntimeCharacter> targets, float amount)
+    public static void MainEffect(RuntimeCharacter cause, OtherEffects effect, List<RuntimeCharacter> targets, float amount, RuntimeEffect cause2 = null)
     {
         switch (effect)
         {
@@ -264,7 +274,11 @@ public class Combat : MonoBehaviour
                     target.Invoke(Triggers.Heal, cause);
                 }
                 break;
-            case OtherEffects.Buff:
+            case OtherEffects.Shield:
+                foreach (RuntimeCharacter target in targets)
+                {
+                    target.Shields.Add(cause2 ,amount);
+                }
                 break;
             case OtherEffects.Energy:
                 foreach (RuntimeCharacter target in targets)
@@ -295,7 +309,8 @@ public class Combat : MonoBehaviour
         float dmgReduction = DMGReductionMultiplier(new List<float>()); //TODO
         float broken = BrokenMultiplier(false); //TODO
         float total = baseDMG * crit * dmg * weaken * def * res * vulnerability * dmgReduction * broken;
-        receiver.CurrentHP -= total;
+        float excess = receiver.DoDamageToShield(total);
+        receiver.CurrentHP -= excess;
     }
 
     public class Team : List<RuntimeCharacter>
@@ -361,7 +376,7 @@ public class Combat : MonoBehaviour
             {
                 action.Invoke(receiver, cause);
             }
-            foreach(CharacterMechanicOnTrigger mechanic in Mechanics)
+            foreach (CharacterMechanicOnTrigger mechanic in Mechanics)
             {
                 mechanic.Invoke(receiver, cause);
             }
@@ -380,37 +395,33 @@ public class Combat : MonoBehaviour
 
             public void Invoke(RuntimeCharacter receiver, RuntimeCharacter cause)
             {
-                if (CorrectCause(cause)) Effect(Combat.GetTargets(_source, _mechanic.target, null));
+                Debug.Log($"Invoking Mechanic from:{_source.BasedOfCharacter.name}");
+                if (CorrectCause(cause)) Effect(GetTargets(_source, _mechanic.target, null));
             }
 
             private bool CorrectCause(RuntimeCharacter cause)
             {
-                foreach (TriggerConditions condition in _mechanic.Condition)
+                if (_mechanic.CauseCondition.Length == 0) return true;
+                foreach (CauseConditions condition in _mechanic.CauseCondition)
                 {
                     switch (condition)
                     {
-                        case TriggerConditions.None:
+                        case CauseConditions.None:
                             break;
-                        case TriggerConditions.ImTheCause:
+                        case CauseConditions.ImTheCause:
                             if (_source == cause) return true;
                             break;
-                        case TriggerConditions.AllyIsTheCause:
+                        case CauseConditions.AllyIsTheCause:
                             foreach (RuntimeCharacter ally in _source.Team)
                             {
                                 if (ally != _source && ally == cause) return true;
                             }
                             break;
-                        case TriggerConditions.EnemyIsTheCause:
+                        case CauseConditions.EnemyIsTheCause:
                             foreach (RuntimeCharacter enemy in _source.Team.EnemyTeam)
                             {
                                 if (enemy == cause) return true;
                             }
-                            break;
-                        case TriggerConditions.ImReceiver:
-                            break;
-                        case TriggerConditions.AllyIsTheReceiver:
-                            break;
-                        case TriggerConditions.EnemyIsTheReceiver:
                             break;
                         default:
                             Debug.LogError($"Unimplemented condition: {condition}, {Enum.GetName(typeof(TriggerConditions), condition)}");
@@ -422,7 +433,7 @@ public class Combat : MonoBehaviour
 
             private void Effect(List<RuntimeCharacter> characters)
             {
-                foreach(var character in characters)
+                foreach (var character in characters)
                 {
                     character.Effects.Add(_mechanic.effect);
                 }

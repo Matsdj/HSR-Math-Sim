@@ -27,7 +27,7 @@ namespace Types
     {
         None,
         Heal,
-        Buff,
+        Shield,
         Energy,
         ActionAdvance,
         DealDMG,
@@ -70,14 +70,6 @@ namespace Types
         AllyAll,
     }
 
-    public enum AbilityEffect
-    {
-        DMG,
-        Heal,
-        Shield,
-        Buff
-    }
-
     public enum Path
     {
         None,
@@ -115,12 +107,19 @@ namespace Types
     public enum TriggerConditions
     {
         None,
+        ImReceiver,
+        /// <summary> Excluding yourself </summary>
+        AllyIsTheReceiver,
+        EnemyIsTheReceiver
+    }
+
+    public enum CauseConditions
+    {
+        None,
         ImTheCause,
+        /// <summary> Excluding yourself </summary>
         AllyIsTheCause,
         EnemyIsTheCause,
-        ImReceiver,
-        AllyIsTheReceiver, //Excluding yourself
-        EnemyIsTheReceiver
     }
 
     public enum AboveOrBelow
