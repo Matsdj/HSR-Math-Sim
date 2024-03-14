@@ -16,7 +16,7 @@ MonoBehaviour:
   OtherEffect: 2
   OtherEffectTriggers: 
   DMG_Type: 0
-  FlatIncrease: 10000
+  FlatIncrease: 1000
   PerIncrease: 0
   ScalesOf: 0
   ScaleOfTargetStats: 0

@@ -36,7 +36,7 @@ MonoBehaviour:
   Basic: {fileID: 0}
   Skill: {fileID: 0}
   Ultimate: {fileID: 0}
-  Talent: {fileID: 0}
+  Talent: {fileID: 11400000, guid: 24994d30cf270b14e873a4fb2b9a5116, type: 2}
   Technique: {fileID: 0}
   LightCone: {fileID: 0}
   Relics:

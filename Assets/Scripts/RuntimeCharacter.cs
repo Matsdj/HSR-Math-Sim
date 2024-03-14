@@ -18,6 +18,9 @@ public class RuntimeCharacter : RuntimeStats
     public RuntimeShields Shields;
     public RuntimeEffects Effects { get => _effects; }
     private RuntimeEffects _effects;
+    private float _turnPercentage;
+
+    public override float Energy { get => base.Energy; set { base.Energy = value; Invoke(Triggers.EnergyChange); } }
 
     public RuntimeCharacter(Character character, float actionValue, int teamId, Team team, int position) : base(character)
     {
@@ -35,6 +38,21 @@ public class RuntimeCharacter : RuntimeStats
     public void DoTurn()
     {
         ActionValue += 10000 / Final.SPD;
+        _turnPercentage = 0;
+    }
+
+    public void UpdateTurnPercentage(float diff, float current)
+    {
+        _turnPercentage += diff / (ActionValue - current);
+    }
+
+    public override void CalculateFinalSPD()
+    {
+        base.CalculateFinalSPD();
+        float remainingActionValue = ActionValue - instance.CurrentActionValue;
+        float diff = (10000 / Final.SPD * (1 - _turnPercentage)) - remainingActionValue;
+        ActionValue += diff;
+        ActionValue = MathF.Max(instance.CurrentActionValue, ActionValue);
     }
 
     public void Invoke(Triggers trigger, RuntimeCharacter cause = null)
@@ -63,20 +81,25 @@ public class RuntimeCharacter : RuntimeStats
         return excessDMG;
     }
 
-    public void DumpCharacterInfo()
+    public string[] CharacterInfo()
     {
-        string log = "";
-        log += BasedOfCharacter.name + "\n";
+        string header = BasedOfCharacter.name;
+
+        string body = "";
+        body += "STATS:";
         foreach(Stats stat in Enum.GetValues(typeof(Stats)))
         {
-            log += $"[{EnumName(stat)}:{GetStat(stat)}], ";
+            body += $"[{EnumName(stat)}:{GetStat(stat)}], ";
         }
-        log += "\n";
+        float highestShield = 0;
+        foreach (float value in Shields.Values) highestShield = Mathf.Max(highestShield, value);
+        body += $"[Shield:{highestShield}]";
+        body += "\n EFFECTS:";
         foreach(RuntimeEffect effect in Effects.Values)
         {
-            log += $"[{effect.Base.name},{EnumName(effect.Base.StatToBuff)}:[Flat:{effect.Base.FlatIncrease}],[Duration:{effect.Duration}]], ";
+            body += $"[{effect.Base.name},{EnumName(effect.Base.StatToBuff)}:[Flat:{effect.Base.FlatIncrease}],[Duration:{effect.Duration}]], ";
         }
-        Debug.Log(log);
+        return new string[] { header, body};
     }
 
     public string EnumName(Stats stat)

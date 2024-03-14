@@ -9,6 +9,9 @@ using static MathFormulas;
 
 public class Combat : MonoBehaviour
 {
+    //Singleton
+    public static Combat instance;
+
     //Setup
     public Character[] Allies;
     public Character[] Enemies;
@@ -22,17 +25,26 @@ public class Combat : MonoBehaviour
     public VerticalLayoutGroup ActionOrderUI;
     public VerticalLayoutGroup ActionHistoryUI;
     public CharacterGridPiece ActionOrderUIPrefab;
+    public Info Info;
 
-    //Private
     //Runtime
     private List<RuntimeCharacter> _actionOrder;
     private List<string> _actionHistory;
-    private float _latestActionValue = 0;
+    private float _currentActionValue = 0;
+    public float CurrentActionValue { get => _currentActionValue; }
     private RuntimeCharacter _Target;
     private Team[] _teams;
 
     public void Awake()
     {
+        //Singleton
+        if (instance == null) instance = this;
+        else
+        {
+            Debug.LogError("Combat already has an instance!");
+            Destroy(gameObject);
+        }
+
         _actionOrder = new List<RuntimeCharacter>();
         //For now this is hard coded to 2, but is made decently flexible for future plans with more than 2 teams
         _teams = new Team[2];
@@ -63,7 +75,7 @@ public class Combat : MonoBehaviour
     public RuntimeCharacter AddCharacter(Character @base, HorizontalLayoutGroup UIparent, int teamId)
     {
         //Logic
-        RuntimeCharacter character = new RuntimeCharacter(@base, _latestActionValue, teamId, _teams[teamId], _teams[teamId].Count);
+        RuntimeCharacter character = new RuntimeCharacter(@base, _currentActionValue, teamId, _teams[teamId], _teams[teamId].Count);
         _actionOrder.Add(character);
         _teams[teamId].Add(character);
         character.Invoke(Triggers.EnemyEnterField);
@@ -83,19 +95,24 @@ public class Combat : MonoBehaviour
         character.DoTurn();
         SortActionOrder();
         _actionOrder[0].Invoke(Triggers.OnTurnStart);
+        _currentActionValue = _actionOrder[0].ActionValue;
     }
 
     public void SortActionOrder()
     {
         _actionOrder.Sort((a, b) => a.ActionValue.CompareTo(b.ActionValue));
-
+        
         foreach (Transform child in ActionOrderUI.transform)
         {
             Destroy(child.gameObject);
         }
 
+        float actionValueDiff = _actionOrder[0].ActionValue - _currentActionValue;
         foreach (RuntimeCharacter character in _actionOrder)
         {
+            character.UpdateTurnPercentage(actionValueDiff, _currentActionValue);
+
+            //UI
             CharacterGridPiece piece = Instantiate(ActionOrderUIPrefab, ActionOrderUI.transform);
             piece.Apply(character.BasedOfCharacter, OpenActionOrderInfo);
         }
@@ -190,7 +207,6 @@ public class Combat : MonoBehaviour
 
     private void BaseUlt(RuntimeCharacter character, Ultimate ultimate)
     {
-
         if (character.Energy >= ultimate.EnergyCost && AbilityLogic(character, ultimate, _Target))
         {
             character.Energy -= ultimate.EnergyCost;
@@ -199,7 +215,6 @@ public class Combat : MonoBehaviour
 
     public bool AbilityLogic(RuntimeCharacter character, Ability ability, RuntimeCharacter target)
     {
-        character.Energy += ability.EnergyGeneration;
         List<RuntimeCharacter> targets = GetTargets(character, ability.Targets, target);
         if (targets.Count == 0) return false;
         //Before triggers
@@ -207,6 +222,7 @@ public class Combat : MonoBehaviour
         if (ability.AbilityType == AbilityType.Skill) character.Invoke(Triggers.BeforeUlt);
         if (ability.AbilityType == AbilityType.Ultimate) character.Invoke(Triggers.BeforeUlt);
         //Do Effect
+        character.Energy += ability.EnergyGeneration;
         float amount = character.GetStat(ability.ScalingStat) * ability.ScalingPer / 100 + ability.FlatAmount;
         MainEffect(character, ability.MainEffect, targets, amount);
         //After triggers
@@ -223,9 +239,11 @@ public class Combat : MonoBehaviour
         switch (targetType)
         {
             case Targets.EnemySingle:
+                if (target == null) return targets;
                 if (target.TeamId != character.TeamId) targets.Add(target);
                 break;
             case Targets.EnemyArea:
+                if (target == null) return targets;
                 if (target.TeamId != character.TeamId) AreaTargeting(target, targets);
                 break;
             case Targets.EnemyAll:
@@ -235,6 +253,7 @@ public class Combat : MonoBehaviour
                 targets.Add(character);
                 break;
             case Targets.AllySingle:
+                if (target == null) return targets;
                 if (target.TeamId == character.TeamId) targets.Add(target);
                 break;
             case Targets.AllyOthers:
@@ -242,6 +261,7 @@ public class Combat : MonoBehaviour
                 targets.Remove(character);
                 break;
             case Targets.AllyArea:
+                if (target == null) return targets;
                 if (target.TeamId == character.TeamId) AreaTargeting(character, targets);
                 break;
             case Targets.AllyAll:
@@ -284,7 +304,6 @@ public class Combat : MonoBehaviour
                 foreach (RuntimeCharacter target in targets)
                 {
                     target.Energy += amount;
-                    target.Invoke(Triggers.EnergyChange, cause);
                 }
                 break;
             case OtherEffects.DealDMG:

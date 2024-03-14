@@ -53,6 +53,7 @@ public class RuntimeEffect
         {
             if (Base.FlatIncrease != 0) _character.GetStatReference(Base.StatToBuff, _character.Flat) += Base.FlatIncrease;
             if (Base.PerIncrease != 0) _character.GetStatReference(Base.StatToBuff, _character.Per) += Base.PerIncrease;
+            _character.CalculateAllFinalStats(Base.StatToBuff, false);
         }
         
 

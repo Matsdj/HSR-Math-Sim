@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using static Combat;
 
-public class CombatCharacterPiece : CharacterGridPiece
+public class CombatCharacterPiece : CharacterGridPiece, IPointerClickHandler
 {
     public RectTransform HealthBar;
     public Button UltButton;
@@ -47,7 +47,7 @@ public class CombatCharacterPiece : CharacterGridPiece
     private void ShowUltButton(RuntimeCharacter reciever, RuntimeCharacter cause)
     {
         bool active = reciever.Energy >= reciever.Adv.MaxEnergy;
-        //Debug.Log($"Energy:{reciever.Energy}, Max:{reciever.Adv.MaxEnergy}");
+        Debug.Log($"Energy:{reciever.Energy}, Max:{reciever.Adv.MaxEnergy}, ShowUltButton:{active}");
         UltButton.gameObject.SetActive(active);
         if (_RuntimeCharacter.BasedOfCharacter.Ultimate is DualUlt) UltButton2.gameObject.SetActive(active);
     }
@@ -55,8 +55,12 @@ public class CombatCharacterPiece : CharacterGridPiece
     public override void OnClick()
     {
         _RuntimeCharacterEvent.Invoke(_RuntimeCharacter, this);
-        _RuntimeCharacter.DumpCharacterInfo();
+    }
 
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Right)
+            _combat.Info.ChangeInfoSource(_RuntimeCharacter.CharacterInfo);
     }
 
     public void OnClickUlt()

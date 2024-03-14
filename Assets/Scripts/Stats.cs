@@ -158,7 +158,7 @@ public class RuntimeStats
         Final.DEF = Base.DEF + Base.DEF * Per.DEF + Flat.DEF;
     }
 
-    public void CalculateFinalSPD()
+    public virtual void CalculateFinalSPD()
     {
         Final.SPD = Base.SPD + Base.SPD * Per.SPD + Flat.SPD;
     }
