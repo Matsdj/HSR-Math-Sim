@@ -24,12 +24,13 @@ public class Combat : MonoBehaviour
     public TMP_Text SkillpointsText;
     public VerticalLayoutGroup ActionOrderUI;
     public VerticalLayoutGroup ActionHistoryUI;
-    public CharacterGridPiece ActionOrderUIPrefab;
     public Info Info;
+    public CharacterGridPiece ActionOrderUIPrefab;
+    public ActionHistoryPiece ActionHistoryUIPrefab;
 
     //Runtime
     private List<RuntimeCharacter> _actionOrder;
-    private List<string> _actionHistory;
+    private List<ActionHistoryPiece> _actionHistory;
     private float _currentActionValue = 0;
     public float CurrentActionValue { get => _currentActionValue; }
     private RuntimeCharacter _Target;
@@ -46,6 +47,8 @@ public class Combat : MonoBehaviour
         }
 
         _actionOrder = new List<RuntimeCharacter>();
+        _actionHistory = new List<ActionHistoryPiece>();
+        _actionHistory.Add(Instantiate(ActionHistoryUIPrefab, ActionHistoryUI.transform));
         //For now this is hard coded to 2, but is made decently flexible for future plans with more than 2 teams
         _teams = new Team[2];
         for (int i = 0; i < _teams.Length; i++) _teams[i] = new Team();
@@ -62,6 +65,8 @@ public class Combat : MonoBehaviour
         }
         foreach (RuntimeCharacter character in _actionOrder) character.Invoke(Triggers.StartOfCombat, character);
         SortActionOrder();
+        _actionOrder[0].Invoke(Triggers.OnTurnStart);
+        _actionHistory[0].Setup(_actionOrder[0], 0);
     }
 
     public void FixedUpdate()
@@ -94,8 +99,11 @@ public class Combat : MonoBehaviour
         character.Invoke(Triggers.OnTurnEnd);
         character.DoTurn();
         SortActionOrder();
-        _actionOrder[0].Invoke(Triggers.OnTurnStart);
         _currentActionValue = _actionOrder[0].ActionValue;
+        _actionHistory.Add(Instantiate(ActionHistoryUIPrefab, ActionHistoryUI.transform).Setup(_actionOrder[0], _actionHistory.Count));
+        _actionOrder[0].Invoke(Triggers.OnTurnStart);
+        
+        
     }
 
     public void SortActionOrder()
@@ -224,6 +232,7 @@ public class Combat : MonoBehaviour
         //Do Effect
         character.Energy += ability.EnergyGeneration;
         float amount = character.GetStat(ability.ScalingStat) * ability.ScalingPer / 100 + ability.FlatAmount;
+        AddTurnInfo($"{ability.name}");
         MainEffect(character, ability.MainEffect, targets, amount);
         //After triggers
         character.Invoke(Triggers.AfterAttack);
@@ -281,7 +290,7 @@ public class Combat : MonoBehaviour
         if (target.Position < target.Team.Count - 1) list.Add(target.Team[target.Position + 1]);
     }
 
-    public static void MainEffect(RuntimeCharacter cause, OtherEffects effect, List<RuntimeCharacter> targets, float amount, RuntimeEffect cause2 = null)
+    public void MainEffect(RuntimeCharacter cause, OtherEffects effect, List<RuntimeCharacter> targets, float amount, RuntimeEffect cause2 = null)
     {
         switch (effect)
         {
@@ -292,18 +301,21 @@ public class Combat : MonoBehaviour
                 {
                     target.CurrentHP += amount;
                     target.Invoke(Triggers.Heal, cause);
+                    AddTurnInfo($"Heal:{amount}");
                 }
                 break;
             case OtherEffects.Shield:
                 foreach (RuntimeCharacter target in targets)
                 {
                     target.Shields.Add(cause2 ,amount);
+                    AddTurnInfo($"New Shield:{amount}");
                 }
                 break;
             case OtherEffects.Energy:
                 foreach (RuntimeCharacter target in targets)
                 {
                     target.Energy += amount;
+                    AddTurnInfo($"Energy Regen:{amount}");
                 }
                 break;
             case OtherEffects.DealDMG:
@@ -315,9 +327,11 @@ public class Combat : MonoBehaviour
                 }
                 break;
         }
+        string targetsInfo = "Targets:";
+        foreach (RuntimeCharacter target in targets) targetsInfo += target.Name + ",";
     }
 
-    public static void DoDamage(RuntimeCharacter cause, RuntimeCharacter receiver, float baseDMG)
+    public void DoDamage(RuntimeCharacter cause, RuntimeCharacter receiver, float baseDMG)
     {
         float crit = Crit(cause.Adv.CRIT_Rate / 100, cause.Adv.CRIT_DMG / 100);
         float dmg = DMGMultiplier(0); //TODO
@@ -330,7 +344,14 @@ public class Combat : MonoBehaviour
         float total = baseDMG * crit * dmg * weaken * def * res * vulnerability * dmgReduction * broken;
         float excess = receiver.DoDamageToShield(total);
         receiver.CurrentHP -= excess;
-        Debug.Log($"Total DMG:{total}, DMG not blocked by shield:{excess}");
+        AddTurnInfo($"Total DMG:{total}");
+    }
+
+    public void AddTurnInfo(string info)
+    {
+        ref string body = ref _actionHistory[_actionHistory.Count - 1].Body;
+        if (body.Length == 0) info = info.TrimStart('\n');
+        body += info + " ";
     }
 
     public class Team : List<RuntimeCharacter>
@@ -379,6 +400,7 @@ public class Combat : MonoBehaviour
     public class CharacterAction : List<Action<RuntimeCharacter, RuntimeCharacter>>
     {
         public List<CharacterMechanicOnTrigger> Mechanics;
+        public new int Count { get => base.Count + Mechanics.Count; }
 
         public CharacterAction()
         {
@@ -415,8 +437,9 @@ public class Combat : MonoBehaviour
 
             public void Invoke(RuntimeCharacter receiver, RuntimeCharacter cause)
             {
-                //Debug.Log($"Invoking Mechanic from:{_source.BasedOfCharacter.name}");
-                if (CorrectCause(cause)) Effect(GetTargets(_source, _mechanic.target, null));
+                bool correctCause = CorrectCause(cause);
+                if (correctCause) Effect(GetTargets(_source, _mechanic.target, null));
+                Combat.instance.AddTurnInfo($"[{_mechanic.effect.name} Applied:{correctCause}]");
             }
 
             private bool CorrectCause(RuntimeCharacter cause)

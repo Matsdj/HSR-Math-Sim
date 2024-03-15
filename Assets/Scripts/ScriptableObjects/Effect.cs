@@ -88,7 +88,7 @@ public class RuntimeEffect
     {
         Debug.Log($"Triggering effect {Base.name}");
         float amount = MathFormulas.BaseAmount(Base.PerIncreaseScalingStat,0,_character.GetStat(Base.ScalesOf), Base.FlatIncrease);
-        Combat.MainEffect(_character, Base.OtherEffect, new List<RuntimeCharacter>() { _character }, amount, this);
+        Combat.instance.MainEffect(_character, Base.OtherEffect, new List<RuntimeCharacter>() { _character }, amount, this);
 
         if (Base.LoseStackOnTrigger)
         {

@@ -28,12 +28,12 @@ public class Info : MonoBehaviour
         ChangeInfo(_infoFunction());
     }
 
-    public void ChangeInfo(string[] info)
+    private void ChangeInfo(string[] info)
     {
         ChangeInfo(info[0], info[1]);
     }
 
-    public void ChangeInfo(string header, string body)
+    private void ChangeInfo(string header, string body)
     {
         gameObject.SetActive(true);
         Header.text = header;

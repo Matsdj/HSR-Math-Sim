@@ -21,6 +21,7 @@ public class RuntimeCharacter : RuntimeStats
     private float _turnPercentage;
 
     public override float Energy { get => base.Energy; set { base.Energy = value; Invoke(Triggers.EnergyChange); } }
+    public string Name { get => BasedOfCharacter.name; }
 
     public RuntimeCharacter(Character character, float actionValue, int teamId, Team team, int position) : base(character)
     {
@@ -58,7 +59,7 @@ public class RuntimeCharacter : RuntimeStats
     public void Invoke(Triggers trigger, RuntimeCharacter cause = null)
     {
         if (cause == null) cause = this;
-        //Debug.Log($"Invoking {Events[trigger].Mechanics.Count} mechanics. Trigger: {Enum.GetName(typeof(Triggers), trigger)} from:{BasedOfCharacter.name}");
+        if (Events[trigger].Mechanics.Count > 0) Combat.instance.AddTurnInfo($"\n{Name}({Enum.GetName(typeof(Triggers), trigger)})");
         Events.Invoke(trigger, this, cause);
         Team.Events.Invoke(trigger, this, cause);
     }
