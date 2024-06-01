@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,7 +21,10 @@ namespace Types
         Effect_Hit_Rate,
         Effect_RES,
         CurrentHP,
-        MissingHP
+        MissingHP,
+        Toughness,
+        LVLMultiplier,
+        MaxToughnessMultiplier,
     }
 
     public enum OtherEffects
@@ -31,6 +35,7 @@ namespace Types
         Energy,
         ActionAdvance,
         DealDMG,
+        SkipTurn,
     }
 
     public enum Element
@@ -55,7 +60,7 @@ namespace Types
         Talent,
         Technique,
         FollowUp,
-        DOT
+        Effect
     }
 
     public enum Targets
@@ -85,12 +90,12 @@ namespace Types
     public enum Triggers
     {
         //All this triggers will have events that pass through 2 values: The Cause, The receiver (List)
-        Always, //Always active even outside of combat
+        Immediate, //Always active even outside of combat
         StartOfCombat,
         BeforeAttack,
         AfterAttack,
-        AfterDefeatEnemy,
-        EnemyEnterField,
+        AfterKill,
+        EnterField,
         WeaknessBreak,
         BeforeUlt,
         AfterUlt,
@@ -102,6 +107,7 @@ namespace Types
         Heal,
         OnTurnStart,
         OnTurnEnd,
+        OnDeath
     }
 
     public enum TriggerConditions
@@ -136,5 +142,35 @@ namespace Types
         Feet,
         Sphere,
         Rope
+    }
+
+    public static class TypesUtility
+    {
+        public static string GetName<T>(T t) where T : Enum
+        {
+            return Enum.GetName(typeof(T), t);
+        }
+
+        public static string GetName<T>(T[] t) where T : Enum
+        {
+            string value = "";
+            foreach(T @enum in t)
+            {
+                value += GetName(@enum) + "&";
+            }
+            value = value.TrimEnd('&');
+            return value;
+        }
+
+        public static string GetName(ScalesOf[] t)
+        {
+            string value = "";
+            foreach (ScalesOf scale in t)
+            {
+                value += GetName(scale.stat) + "&";
+            }
+            value = value.TrimEnd('&');
+            return value;
+        }
     }
 }

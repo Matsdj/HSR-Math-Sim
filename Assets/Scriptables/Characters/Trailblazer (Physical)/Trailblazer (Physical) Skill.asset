@@ -20,17 +20,6 @@ MonoBehaviour:
   ScalingPer: 62
   ScalingPerReductionForNonMainTargets: 0
   FlatAmount: 0
+  WeaknessBreak: 30
+  ExtraWeaknessBreakForMainTarget: 30
   ApplyEffectToTarget: {fileID: 0}
-  Passive:
-    Trigger: 
-    Condition: 
-    TargetNeedsEffects: []
-    excludeIfEffect: 0
-    StatCondition: 0
-    AboveOrBelow: 0
-    FlatAmount: 0
-    PerAmount: 0
-    UseAnd: 0
-    target: 0
-    effect: {fileID: 0}
-    effectStackCountInflicted: 1

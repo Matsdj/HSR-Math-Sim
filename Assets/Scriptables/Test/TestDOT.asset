@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81c33b9cb39fd734a84508cda35980dd, type: 3}
   m_Name: TestDOT
   m_EditorClassIdentifier: 
+  BaseChanceToApply: 0
+  IsFixed: 0
   StatToBuff: 0
-  OtherEffect: 2
-  OtherEffectTriggers: 10000000
+  OtherEffect: 5
+  OtherEffectTriggers: 0f000000
   DMG_Type: 0
   FlatIncrease: 100
   PerIncrease: 0

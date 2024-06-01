@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Types;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -8,6 +9,7 @@ using UnityEngine.UI;
 public class CombatCharacterPiece : CharacterGridPiece, IPointerClickHandler
 {
     public RectTransform HealthBar;
+    public RectTransform ToughnessBar;
     public Button UltButton;
     public Button UltButton2;
     private RuntimeCharacter _RuntimeCharacter;
@@ -26,8 +28,10 @@ public class CombatCharacterPiece : CharacterGridPiece, IPointerClickHandler
     {
         Setup(c);
         _RuntimeCharacter = RuntimeCharacter;
-        _RuntimeCharacter.Events[Types.Triggers.AfterTakingDamage].Add(UpdateHealthBar);
-        _RuntimeCharacter.Events[Types.Triggers.EnergyChange].Add(ShowUltButton);
+        _RuntimeCharacter.Events[Triggers.AfterTakingDamage].Add(UpdateHealthBar);
+        _RuntimeCharacter.Events[Triggers.AfterTakingDamage].Add(UpdateToughnessBar);
+        _RuntimeCharacter.Events[Triggers.EnergyChange].Add(ShowUltButton);
+        _RuntimeCharacter.Events[Triggers.OnDeath].Add(DestroySelf);
         _combat = combat;
 
     }
@@ -40,8 +44,13 @@ public class CombatCharacterPiece : CharacterGridPiece, IPointerClickHandler
     private void UpdateHealthBar(RuntimeCharacter reciever, RuntimeCharacter cause)
     {
         float x = reciever.CurrentHP / reciever.Final.HP;
-        //Debug.Log($"HP:{reciever.CurrentHP}, MaxHP:{reciever.Final.HP}, {x}");
         HealthBar.localScale = new Vector3(Mathf.Clamp(x, 0, 1), 1, 1);
+    }
+
+    private void UpdateToughnessBar(RuntimeCharacter reciever, RuntimeCharacter cause)
+    {
+        float x = reciever.Adv.Toughness / reciever.AdvancedStats.Toughness;
+        ToughnessBar.localScale = new Vector3(Mathf.Clamp(x, 0, 1), 1, 1);
     }
 
     private void ShowUltButton(RuntimeCharacter reciever, RuntimeCharacter cause)
@@ -71,5 +80,10 @@ public class CombatCharacterPiece : CharacterGridPiece, IPointerClickHandler
     public void OnClickUlt2()
     {
         _combat.Ult2(_RuntimeCharacter);
+    }
+
+    public void DestroySelf(RuntimeCharacter receiver, RuntimeCharacter cause)
+    {
+        Destroy(this);
     }
 }

@@ -11,9 +11,9 @@ public class MathFormulas
     /// <param name="extraMultiplier">this appears only on some skills, like Dan Heng's Ultimate that deals additional damage to slowed enemies</param>
     /// <param name="scalingAttribute">this is the attribute the skill scales off - in most cases it's ATK</param>
     /// <param name="extraFlatAmount">this is the flat additional damage that appears on some skills</param>
-    public static float BaseAmount(float skillMultiplier, float extraMultiplier, float scalingAttribute, float extraFlatAmount)
+    public static float BaseAmount(float skillMultiplier, float extraMultiplier, float scalingAttribute, float extraFlatAmount, float amountCap = Mathf.Infinity)
     {
-        return (skillMultiplier + extraMultiplier) * scalingAttribute + extraFlatAmount;
+        return Mathf.Min((skillMultiplier + extraMultiplier) / 100 * scalingAttribute + extraFlatAmount, amountCap);
     }
 
     /// <summary>

@@ -898,6 +898,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 454920b34709b604b92ddc06ee8b3468, type: 2}
   - {fileID: 11400000, guid: 725ce9aab3dff8440b54229a75328c02, type: 2}
   - {fileID: 11400000, guid: 892937ba79e667c408c90056a0536520, type: 2}
+  BreakEffects:
+  - {fileID: 11400000, guid: 75a7f923ae0f4a44e953b16fee37d3b5, type: 2}
+  - {fileID: 11400000, guid: b2d20fa057d86774fa5a5c222ddf049a, type: 2}
+  - {fileID: 11400000, guid: 6d9db6d154e5b7c44ad2eb68f747b773, type: 2}
+  - {fileID: 11400000, guid: 5f78948f2a93be74e8989b0d8523db28, type: 2}
+  - {fileID: 11400000, guid: dd0f124ac1857fa488b39d0fb1c7bf01, type: 2}
+  - {fileID: 11400000, guid: cbd232cfa82fd4746b454175bf8eb555, type: 2}
+  - {fileID: 11400000, guid: 07044d1f1af487944b2859a40d401bb8, type: 2}
   AllyUI: {fileID: 1309193918}
   EnemyUI: {fileID: 794500951}
   CharacterButtonUIPrefab: {fileID: 7580597075294018002, guid: 5448134a866613a459a5303e030887f4, type: 3}

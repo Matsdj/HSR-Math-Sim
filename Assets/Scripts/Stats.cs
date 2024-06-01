@@ -40,13 +40,14 @@ public class AdvancedStats
     [HideInInspector]
     public float CRIT_Rate = 5,
         CRIT_DMG = 50,
-        BreakEffect,
+        BreakEffect = 100,
         OutgoingHealingBoost,
         EnergyRegenerationRate,
         EffectHitRate,
         EffectRES;
     public float MaxEnergy,
-        Aggro;
+        Aggro,
+        Toughness = 240;
     [HideInInspector] public ElementBoost DMG_Boosts, RES_Boosts;
 
     public class ElementBoost
@@ -108,6 +109,7 @@ public class RuntimeStats
         //Adv
         Adv.MaxEnergy = AdvancedStats.MaxEnergy;
         Adv.Aggro = AdvancedStats.Aggro;
+        Adv.Toughness = AdvancedStats.Toughness;
     }
 
     public float ScaleStat(int lvl, int ascension, float baseStat)
@@ -198,9 +200,23 @@ public class RuntimeStats
                 return CurrentHP;
             case Stats.MissingHP:
                 return Final.HP - CurrentHP;
+            case Stats.Toughness:
+                return Adv.Toughness;
+            case Stats.LVLMultiplier:
+                return LevelMultiplier[LVL-1];
         }
         Debug.LogError("Unimplemented Stat");
         return 0;
+    }
+
+    public float GetStat(Stats[] stats)
+    {
+        float value = 1;
+        foreach(var stat in stats)
+        {
+            value *= GetStat(stat);
+        }
+        return value;
     }
 
     public ref float GetStatReference(Stats stat, BaseStats @base, AdvancedStats advanced)
@@ -245,4 +261,12 @@ public class RuntimeStats
     {
         return ref GetStatReference(stat, null, advanced);
     }
+
+    public float[] LevelMultiplier = new float[] {
+    54f,58f,62f,67.5264f,70.5094f,73.5228f,76.566f,79.6385f,82.7395f,85.8684f,91.4944f,97.068f,102.5892f,108.0579f,113.4743f,
+    118.8383f,124.1499f,129.4091f,134.6159f,139.7703f,149.3323f,158.8011f,168.1768f,177.4594f,186.6489f,195.7452f,204.7484f,213.6585f,
+    222.4754f,231.1992f,246.4276f,261.181f,275.4733f,289.3179f,302.7275f,315.7144f,328.2905f,340.4671f,352.2554f,363.6658f,408.124f,451.7883f,
+    494.6798f,536.8188f,578.2249f,618.9172f,658.9138f,698.2325f,736.8905f,774.9041f,871.0599f,964.8705f,1056.4206f,1145.791f,1233.0585f,1318.2965f,
+    1401.575f,1482.9608f,1562.5178f,1640.3068f,1752.3215f,1861.9011f,1969.1242f,2074.0659f,2176.7983f,2277.3904f,2375.9085f,2472.416f,2566.9739f,
+    2659.6406f,2780.3044f,2898.6022f,3014.6029f,3128.3729f,3239.9758f,3349.473f,3456.9236f,3562.3843f,3665.9099f,3767.5533f};
 }

@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using TMPro;
 using Types;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
+using static Combat.CharacterAction;
 using static MathFormulas;
 
 public class Combat : MonoBehaviour
@@ -15,6 +17,7 @@ public class Combat : MonoBehaviour
     //Setup
     public Character[] Allies;
     public Character[] Enemies;
+    public Effect[] BreakEffects;
 
     //UI
     public HorizontalLayoutGroup AllyUI;
@@ -33,7 +36,7 @@ public class Combat : MonoBehaviour
     private List<ActionHistoryPiece> _actionHistory;
     private float _currentActionValue = 0;
     public float CurrentActionValue { get => _currentActionValue; }
-    private RuntimeCharacter _Target;
+    private RuntimeCharacter _target;
     private Team[] _teams;
 
     public void Awake()
@@ -47,11 +50,10 @@ public class Combat : MonoBehaviour
         }
 
         _actionOrder = new List<RuntimeCharacter>();
-        _actionHistory = new List<ActionHistoryPiece>();
-        _actionHistory.Add(Instantiate(ActionHistoryUIPrefab, ActionHistoryUI.transform));
+        _actionHistory = new List<ActionHistoryPiece> { Instantiate(ActionHistoryUIPrefab, ActionHistoryUI.transform) };
         //For now this is hard coded to 2, but is made decently flexible for future plans with more than 2 teams
         _teams = new Team[2];
-        for (int i = 0; i < _teams.Length; i++) _teams[i] = new Team();
+        for (int i = 0; i < _teams.Length; i++) _teams[i] = new Team(i);
         _teams[0].SkillpointsUI = SkillpointsText;
         _teams[0].EnemyTeam = _teams[1];
         _teams[1].EnemyTeam = _teams[0];
@@ -71,7 +73,7 @@ public class Combat : MonoBehaviour
 
     public void FixedUpdate()
     {
-        if (_actionOrder[0].TeamId != 0)
+        if (_actionOrder[0].Team.Id != 0)
         {
             DoTurn(_actionOrder[0]);
         }
@@ -80,10 +82,10 @@ public class Combat : MonoBehaviour
     public RuntimeCharacter AddCharacter(Character @base, HorizontalLayoutGroup UIparent, int teamId)
     {
         //Logic
-        RuntimeCharacter character = new RuntimeCharacter(@base, _currentActionValue, teamId, _teams[teamId], _teams[teamId].Count);
+        RuntimeCharacter character = new RuntimeCharacter(@base, _currentActionValue, _teams[teamId], _teams[teamId].Count, _actionOrder.Count);
         _actionOrder.Add(character);
         _teams[teamId].Add(character);
-        character.Invoke(Triggers.EnemyEnterField);
+        character.Invoke(Triggers.EnterField);
         TalentSetup(character);
 
         //UI
@@ -94,22 +96,26 @@ public class Combat : MonoBehaviour
         return character;
     }
 
+    public void RemoveCharacter(RuntimeCharacter character)
+    {
+        _actionOrder.Remove(character);
+        _teams[character.Team.Id].Remove(character);
+    }
+
     public void DoTurn(RuntimeCharacter character)
     {
         character.Invoke(Triggers.OnTurnEnd);
         character.DoTurn();
-        SortActionOrder();
         _currentActionValue = _actionOrder[0].ActionValue;
         _actionHistory.Add(Instantiate(ActionHistoryUIPrefab, ActionHistoryUI.transform).Setup(_actionOrder[0], _actionHistory.Count));
         _actionOrder[0].Invoke(Triggers.OnTurnStart);
-        
-        
     }
 
     public void SortActionOrder()
     {
+        if (_actionOrder.Count == 0) return;
         _actionOrder.Sort((a, b) => a.ActionValue.CompareTo(b.ActionValue));
-        
+
         foreach (Transform child in ActionOrderUI.transform)
         {
             Destroy(child.gameObject);
@@ -135,7 +141,7 @@ public class Combat : MonoBehaviour
 
     public void Target(RuntimeCharacter character, CombatCharacterPiece piece)
     {
-        _Target = character;
+        _target = character;
         SelectedCharacterUI.position = piece.transform.position;
     }
 
@@ -146,8 +152,12 @@ public class Combat : MonoBehaviour
 
     public void TalentSetup(RuntimeCharacter character)
     {
-        if (character.BasedOfCharacter.Talent == null) return;
-        foreach (Mechanics passive in character.BasedOfCharacter.Talent.Passives)
+        character.AddPassives();
+    }
+
+    public static void AddPassives(Mechanics[] passives, RuntimeCharacter character, RuntimeCharacter.SimpleFunc removeEvent)
+    {
+        foreach (Mechanics passive in passives)
         {
             foreach (Triggers trigger in passive.Trigger)
             {
@@ -159,16 +169,16 @@ public class Combat : MonoBehaviour
                         case TriggerConditions.None:
                             break;
                         case TriggerConditions.ImReceiver:
-                            character.Events[trigger].Add(passive, character);
+                            character.Events[trigger].Add(passive, character, removeEvent);
                             break;
                         case TriggerConditions.AllyIsTheReceiver:
                             foreach (RuntimeCharacter ally in character.Team)
                             {
-                                if (ally != character) ally.Events[trigger].Add(passive, character);
+                                if (ally != character) ally.Events[trigger].Add(passive, character, removeEvent);
                             }
                             break;
                         case TriggerConditions.EnemyIsTheReceiver:
-                            character.Team.EnemyTeam.Events[trigger].Add(passive, character);
+                            character.Team.EnemyTeam.Events[trigger].Add(passive, character, removeEvent);
                             break;
                         default:
                             Debug.LogError($"Unimplemented condition: {condition}, {Enum.GetName(typeof(TriggerConditions), condition)}");
@@ -176,7 +186,7 @@ public class Combat : MonoBehaviour
                     }
                     //Debug.Log($"{character.BasedOfCharacter.name} now has {character.Events[trigger].Mechanics.Count} Mechanics added to it's CharacterActions. Condition:{condition}");
                 }
-                
+
             }
         }
     }
@@ -184,7 +194,7 @@ public class Combat : MonoBehaviour
     public void Basic()
     {
         RuntimeCharacter character = _actionOrder[0];
-        if (AbilityLogic(character, character.BasedOfCharacter.Basic, _Target))
+        if (AbilityLogic(character, character.BasedOfCharacter.Basic, _target))
         {
             character.Team.SkillPoints++;
             DoTurn(character);
@@ -194,7 +204,7 @@ public class Combat : MonoBehaviour
     public void Skill()
     {
         RuntimeCharacter character = _actionOrder[0];
-        if (character.Team.SkillPoints > 0 && AbilityLogic(character, character.BasedOfCharacter.Skill, _Target))
+        if (character.Team.SkillPoints > 0 && AbilityLogic(character, character.BasedOfCharacter.Skill, _target))
         {
             character.Team.SkillPoints--;
             DoTurn(character);
@@ -215,7 +225,7 @@ public class Combat : MonoBehaviour
 
     private void BaseUlt(RuntimeCharacter character, Ultimate ultimate)
     {
-        if (character.Energy >= ultimate.EnergyCost && AbilityLogic(character, ultimate, _Target))
+        if (character.Energy >= ultimate.EnergyCost && AbilityLogic(character, ultimate, _target))
         {
             character.Energy -= ultimate.EnergyCost;
         }
@@ -223,71 +233,25 @@ public class Combat : MonoBehaviour
 
     public bool AbilityLogic(RuntimeCharacter character, Ability ability, RuntimeCharacter target)
     {
-        List<RuntimeCharacter> targets = GetTargets(character, ability.Targets, target);
+        TargetCharacters targets = new TargetCharacters(character, ability.Targets, target, character);
         if (targets.Count == 0) return false;
         //Before triggers
         character.Invoke(Triggers.BeforeAttack);
-        if (ability.AbilityType == AbilityType.Skill) character.Invoke(Triggers.BeforeUlt);
-        if (ability.AbilityType == AbilityType.Ultimate) character.Invoke(Triggers.BeforeUlt);
+        if (ability.IsOfType(AbilityType.Skill)) character.Invoke(Triggers.BeforeUlt);
+        if (ability.IsOfType(AbilityType.Ultimate)) character.Invoke(Triggers.BeforeUlt);
         //Do Effect
         character.Energy += ability.EnergyGeneration;
-        float amount = character.GetStat(ability.ScalingStat) * ability.ScalingPer / 100 + ability.FlatAmount;
+        float amount = BaseAmount(ability.ScalingPer, 0, character.GetStat(ability.ScalingStat), ability.FlatAmount);
         AddTurnInfo($"{ability.name}");
         MainEffect(character, ability.MainEffect, targets, amount);
+        WeaknessBreak(targets, ability.WeaknessBreak, ability.ExtraWeaknessBreakForMainTarget);
+        Effect(targets, ability.ApplyEffectToTarget);
         //After triggers
         character.Invoke(Triggers.AfterAttack);
-        if (ability.AbilityType == AbilityType.Skill) character.Invoke(Triggers.AfterSkill);
-        if (ability.AbilityType == AbilityType.Ultimate) character.Invoke(Triggers.AfterUlt);
+        if (ability.IsOfType(AbilityType.Skill)) character.Invoke(Triggers.AfterSkill);
+        if (ability.IsOfType(AbilityType.Ultimate)) character.Invoke(Triggers.AfterUlt);
 
         return true;
-    }
-
-    public static List<RuntimeCharacter> GetTargets(RuntimeCharacter character, Targets targetType, RuntimeCharacter target)
-    {
-        List<RuntimeCharacter> targets = new List<RuntimeCharacter>();
-        switch (targetType)
-        {
-            case Targets.EnemySingle:
-                if (target == null) return targets;
-                if (target.TeamId != character.TeamId) targets.Add(target);
-                break;
-            case Targets.EnemyArea:
-                if (target == null) return targets;
-                if (target.TeamId != character.TeamId) AreaTargeting(target, targets);
-                break;
-            case Targets.EnemyAll:
-                foreach (RuntimeCharacter c in character.Team.EnemyTeam) targets.Add(c);
-                break;
-            case Targets.Self:
-                targets.Add(character);
-                break;
-            case Targets.AllySingle:
-                if (target == null) return targets;
-                if (target.TeamId == character.TeamId) targets.Add(target);
-                break;
-            case Targets.AllyOthers:
-                foreach (RuntimeCharacter c in character.Team) targets.Add(c);
-                targets.Remove(character);
-                break;
-            case Targets.AllyArea:
-                if (target == null) return targets;
-                if (target.TeamId == character.TeamId) AreaTargeting(character, targets);
-                break;
-            case Targets.AllyAll:
-                foreach (RuntimeCharacter c in character.Team) targets.Add(c);
-                break;
-            default:
-                Debug.LogError("Unimplemented ability target type");
-                break;
-        }
-        return targets;
-    }
-
-    public static void AreaTargeting(RuntimeCharacter target, List<RuntimeCharacter> list)
-    {
-        list.Add(target);
-        if (target.Position > 0) list.Add(target.Team[target.Position - 1]);
-        if (target.Position < target.Team.Count - 1) list.Add(target.Team[target.Position + 1]);
     }
 
     public void MainEffect(RuntimeCharacter cause, OtherEffects effect, List<RuntimeCharacter> targets, float amount, RuntimeEffect cause2 = null)
@@ -307,7 +271,7 @@ public class Combat : MonoBehaviour
             case OtherEffects.Shield:
                 foreach (RuntimeCharacter target in targets)
                 {
-                    target.Shields.Add(cause2 ,amount);
+                    target.Shields.Add(cause2, amount);
                     AddTurnInfo($"New Shield:{amount}");
                 }
                 break;
@@ -318,22 +282,33 @@ public class Combat : MonoBehaviour
                     AddTurnInfo($"Energy Regen:{amount}");
                 }
                 break;
+            case OtherEffects.ActionAdvance:
+                foreach (RuntimeCharacter target in targets)
+                {
+                    target.ActionAdvanceForward(amount);
+                    AddTurnInfo($"Action Advanceforward:{amount}");
+                }
+                break;
             case OtherEffects.DealDMG:
                 foreach (RuntimeCharacter target in targets) target.Invoke(Triggers.BeforeTakingDamage, cause);
                 foreach (RuntimeCharacter target in targets)
                 {
-                    DoDamage(cause, target, amount);
+                    DoDamage(cause, target, amount, true);
                     target.Invoke(Triggers.AfterTakingDamage, cause);
                 }
+                break;
+            case OtherEffects.SkipTurn:
+                foreach (RuntimeCharacter target in targets) DoTurn(target);
                 break;
         }
         string targetsInfo = "Targets:";
         foreach (RuntimeCharacter target in targets) targetsInfo += target.Name + ",";
+        AddTurnInfo(targetsInfo);
     }
 
-    public void DoDamage(RuntimeCharacter cause, RuntimeCharacter receiver, float baseDMG)
+    public void DoDamage(RuntimeCharacter cause, RuntimeCharacter receiver, float baseDMG, bool canCrit)
     {
-        float crit = Crit(cause.Adv.CRIT_Rate / 100, cause.Adv.CRIT_DMG / 100);
+        float crit = canCrit ? Crit(cause.Adv.CRIT_Rate / 100, cause.Adv.CRIT_DMG / 100) : 1;
         float dmg = DMGMultiplier(0); //TODO
         float weaken = WeakenMultiplier(0); //TODO
         float def = DEFMultiplier(cause.LVL, receiver.Base.DEF, 0, 0); //TODO
@@ -347,11 +322,142 @@ public class Combat : MonoBehaviour
         AddTurnInfo($"Total DMG:{total}");
     }
 
-    public void AddTurnInfo(string info)
+    public static void Effect(TargetCharacters targets, Effect effect)
     {
-        ref string body = ref _actionHistory[_actionHistory.Count - 1].Body;
+        if (!effect) return;
+        foreach (var target in targets)
+        {
+            Effect(target, targets.Cause, effect);
+        }
+    }
+
+    public static void Effect(RuntimeCharacter target, RuntimeCharacter cause, Effect effect)
+    {
+        bool hit = UnityEngine.Random.value < (effect.IsFixed ? effect.BaseChanceToApply : effect.BaseChanceToApply * cause.Adv.EffectHitRate * (1 - target.Adv.EffectRES));
+        if (hit) target.Effects.Add(effect, cause);
+    }
+
+    public void WeaknessBreak(TargetCharacters targets, float amount, float mainAmount)
+    {
+        foreach (var target in targets) WeaknessBreak(target, amount, targets.Cause);
+        WeaknessBreak(targets.Main, mainAmount, targets.Cause);
+    }
+
+    public void WeaknessBreak(RuntimeCharacter target, float amount, RuntimeCharacter cause)
+    {
+        if (target.Adv.Toughness > 0) target.Adv.Toughness -= amount;
+        if (target.Adv.Toughness <= 0 && !target.IsWeaknessBroken)
+        {
+            AddTurnInfo($"WeaknessBreaked:{target.Name}, Cause:{cause.Name}");
+            target.IsWeaknessBroken = true;
+            target.Invoke(Triggers.WeaknessBreak, cause);
+            target.ActionAdvanceForward(-0.25f);
+            float MaxToughnessMultiplier = 0.5f + target.BasedOfCharacter.advancedStats.Toughness / 120;
+            float baseDMG = MaxToughnessMultiplier * cause.GetStat(Stats.LVLMultiplier) * cause.Adv.BreakEffect / 100;
+            switch (cause.BasedOfCharacter.element)
+            {
+                case Element.None:
+                    break;
+                case Element.All:
+                    break;
+                case Element.Physical:
+                    DoDamage(cause, target, 2 * baseDMG, false);
+                    Effect(target, cause, BreakEffects[0]);
+                    break;
+                case Element.Fire:
+                    DoDamage(cause, target, 2 * baseDMG, false);
+                    Effect(target, cause, BreakEffects[1]);
+                    break;
+                case Element.Ice:
+                    DoDamage(cause, target, 1 * baseDMG, false);
+                    Effect(target, cause, BreakEffects[2]);
+                    break;
+                case Element.Lightning:
+                    DoDamage(cause, target, 1 * baseDMG, false);
+                    Effect(target, cause, BreakEffects[3]);
+                    break;
+                case Element.Wind:
+                    DoDamage(cause, target, 1.5f * baseDMG, false);
+                    Effect(target, cause, BreakEffects[4]);
+                    Effect(target, cause, BreakEffects[4]);
+                    Effect(target, cause, BreakEffects[4]);
+                    break;
+                case Element.Quantum:
+                    DoDamage(cause, target, .5f * baseDMG, false);
+                    Effect(target, cause, BreakEffects[5]);
+                    break;
+                case Element.Imaginary:
+                    DoDamage(cause, target, .5f * baseDMG, false);
+                    Effect(target, cause, BreakEffects[6]);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public static void AddTurnInfo(string info)
+    {
+        ref string body = ref instance._actionHistory[instance._actionHistory.Count - 1].Body;
         if (body.Length == 0) info = info.TrimStart('\n');
         body += info + " ";
+    }
+
+    public class TargetCharacters : List<RuntimeCharacter>
+    {
+        public RuntimeCharacter Main;
+        public RuntimeCharacter Cause;
+
+        public TargetCharacters(RuntimeCharacter character, Targets targetType, RuntimeCharacter target, RuntimeCharacter cause)
+        {
+            switch (targetType)
+            {
+                case Targets.EnemySingle:
+                    if (target != null && target.Team.Id == character.Team.EnemyTeam.Id) Add(target);
+                    break;
+                case Targets.EnemyArea:
+                    if (target != null && target.Team.Id == character.Team.EnemyTeam.Id) AreaTargeting(target);
+                    break;
+                case Targets.EnemyAll:
+                    if (target != null && target.Team.Id == character.Team.EnemyTeam.Id) Main = target;
+                    foreach (RuntimeCharacter c in character.Team.EnemyTeam) Add(c);
+                    break;
+                case Targets.Self:
+                    Add(character);
+                    break;
+                case Targets.AllySingle:
+                    if (target != null && target.Team.Id == character.Team.Id) Add(target);
+                    break;
+                case Targets.AllyOthers:
+                    foreach (RuntimeCharacter c in character.Team) Add(c);
+                    Remove(character);
+                    break;
+                case Targets.AllyArea:
+                    if (target != null && target.Team.Id == character.Team.Id) AreaTargeting(target);
+                    break;
+                case Targets.AllyAll:
+                    if (target != null && target.Team.Id == character.Team.Id) Main = target;
+                    foreach (RuntimeCharacter c in character.Team) Add(c);
+                    break;
+                default:
+                    Debug.LogError("Unimplemented ability target type");
+                    break;
+            }
+            Cause = cause;
+        }
+
+        public new void Add(RuntimeCharacter character)
+        {
+            if (Main == null) Main = character;
+            base.Add(character);
+        }
+
+        private void AreaTargeting(RuntimeCharacter target)
+        {
+            Add(target);
+            if (target.Position > 0) Add(target.Team[target.Position - 1]);
+            if (target.Position < target.Team.Count - 1) Add(target.Team[target.Position + 1]);
+        }
     }
 
     public class Team : List<RuntimeCharacter>
@@ -375,9 +481,12 @@ public class Combat : MonoBehaviour
 
         public Team EnemyTeam;
 
-        public Team()
+        public int Id;
+
+        public Team(int id)
         {
             Events = new CharacterEvents();
+            Id = id;
         }
     }
 
@@ -407,9 +516,11 @@ public class Combat : MonoBehaviour
             Mechanics = new List<CharacterMechanicOnTrigger>();
         }
 
-        public void Add(Mechanics mechanic, RuntimeCharacter source)
+        public void Add(Mechanics mechanic, RuntimeCharacter source, RuntimeCharacter.SimpleFunc removeFunction)
         {
-            Mechanics.Add(new CharacterMechanicOnTrigger(mechanic, source));
+            CharacterMechanicOnTrigger characterMechanicOnTrigger = new CharacterMechanicOnTrigger(mechanic, source, Mechanics);
+            Mechanics.Add(characterMechanicOnTrigger);
+            if (removeFunction != null) removeFunction += characterMechanicOnTrigger.RemoveFromList;
         }
 
         public void Invoke(RuntimeCharacter receiver, RuntimeCharacter cause)
@@ -428,18 +539,20 @@ public class Combat : MonoBehaviour
         {
             private Mechanics _mechanic;
             private RuntimeCharacter _source;
+            private List<CharacterMechanicOnTrigger> _list;
 
-            public CharacterMechanicOnTrigger(Mechanics mechanic, RuntimeCharacter source)
+            public CharacterMechanicOnTrigger(Mechanics mechanic, RuntimeCharacter source, List<CharacterMechanicOnTrigger> list)
             {
                 _mechanic = mechanic;
                 _source = source;
+                _list = list;
             }
 
             public void Invoke(RuntimeCharacter receiver, RuntimeCharacter cause)
             {
                 bool correctCause = CorrectCause(cause);
-                if (correctCause) Effect(GetTargets(_source, _mechanic.target, null));
-                Combat.instance.AddTurnInfo($"[{_mechanic.effect.name} Applied:{correctCause}]");
+                if (correctCause) Effect(new TargetCharacters(_source, _mechanic.target, null, _source), _mechanic.effect);
+                AddTurnInfo($"[{_mechanic.effect.name} Applied:{correctCause}]");
             }
 
             private bool CorrectCause(RuntimeCharacter cause)
@@ -474,12 +587,9 @@ public class Combat : MonoBehaviour
                 return false;
             }
 
-            private void Effect(List<RuntimeCharacter> characters)
+            public void RemoveFromList()
             {
-                foreach (var character in characters)
-                {
-                    character.Effects.Add(_mechanic.effect);
-                }
+                _list.Remove(this);
             }
         }
     }

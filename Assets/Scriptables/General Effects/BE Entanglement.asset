@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81c33b9cb39fd734a84508cda35980dd, type: 3}
+  m_Name: BE Entanglement
+  m_EditorClassIdentifier: 
+  BaseChanceToApply: 150
+  IsFixed: 0
+  Buffs: []
+  OtherEffect:
+  - Triggers: 0f000000
+    Other:
+    - Effect: 5
+      DMG_Type: 7
+      FlatIncrease: 0
+      Multiplier: 0.6
+      ScalesOf:
+      - stat: 16
+        UseTargetStat: 0
+      - stat: 17
+        UseTargetStat: 1
+      - stat: 7
+        UseTargetStat: 0
+      MultiplierOnEliteAndBoss: 0
+      ScaleCap: []
+      ScaleCapMultiplier: 0
+      OnlyAppliesToAbilityType: 
+  - Triggers: 00000000
+    Other:
+    - Effect: 4
+      DMG_Type: 0
+      FlatIncrease: 0
+      Multiplier: -0.2
+      ScalesOf:
+      - stat: 7
+        UseTargetStat: 0
+      MultiplierOnEliteAndBoss: 0
+      ScaleCap: []
+      ScaleCapMultiplier: 0
+      OnlyAppliesToAbilityType: 
+  Duration: 1
+  CountDownAtStart: 1
+  CountDownAtEnd: 0
+  StackMax: 5
+  StackCountMultipliesEffect: 1
+  LoseStackOnTrigger: 0
+  CanStackWithSameType: 0
+  targetPassives:
+  - Trigger: 03000000
+    TriggerCondition: 01000000
+    CauseCondition: 
+    TargetNeedsEffects: []
+    excludeIfEffect: 0
+    StatCondition: 0
+    AboveOrBelow: 0
+    FlatAmount: 0
+    PerAmount: 0
+    UseAnd: 0
+    target: 3
+    effect: {fileID: 11400000}
+    effectStackCountInflicted: 1

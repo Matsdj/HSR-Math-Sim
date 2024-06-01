@@ -9,6 +9,7 @@ public class Character : ScriptableObject
     public Sprite sprite;
     public Path path;
     public Element element;
+    public bool IsEliteOrBoss;
     public int LVL = 1;
     public int Ascension = 0;
     public BaseStats baseStats;
