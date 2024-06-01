@@ -68,6 +68,7 @@ namespace Types
         EnemySingle,
         EnemyArea,
         EnemyAll,
+        EnemyRandom,
         Self,
         AllySingle,
         AllyOthers, //Excluding cause

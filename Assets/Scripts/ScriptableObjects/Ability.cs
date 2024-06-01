@@ -18,6 +18,7 @@ public class Ability : ScriptableObject
     public float WeaknessBreak = 30;
     public float ExtraWeaknessBreakForMainTarget;
     public Effect ApplyEffectToTarget;
+    public Ability[] TriggerThisAbility;
     public bool IsOfType(AbilityType type)
     {
         return AbilityTypes.Contains(type);

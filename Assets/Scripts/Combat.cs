@@ -246,6 +246,11 @@ public class Combat : MonoBehaviour
         MainEffect(character, ability.MainEffect, targets, amount);
         WeaknessBreak(targets, ability.WeaknessBreak, ability.ExtraWeaknessBreakForMainTarget);
         Effect(targets, ability.ApplyEffectToTarget);
+        //Trigger Abilities
+        foreach(Ability TriggeredAbility in ability.TriggerThisAbility)
+        {
+            AbilityLogic(character, TriggeredAbility, target);
+        }
         //After triggers
         character.Invoke(Triggers.AfterAttack);
         if (ability.IsOfType(AbilityType.Skill)) character.Invoke(Triggers.AfterSkill);
@@ -421,6 +426,10 @@ public class Combat : MonoBehaviour
                 case Targets.EnemyAll:
                     if (target != null && target.Team.Id == character.Team.EnemyTeam.Id) Main = target;
                     foreach (RuntimeCharacter c in character.Team.EnemyTeam) Add(c);
+                    break;
+                case Targets.EnemyRandom:
+                    int id = UnityEngine.Random.Range(0, character.Team.EnemyTeam.Count);
+                    Add(character.Team.EnemyTeam[id]);
                     break;
                 case Targets.Self:
                     Add(character);
