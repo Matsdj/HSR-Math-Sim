@@ -13,25 +13,19 @@ MonoBehaviour:
   m_Name: Trailblazer (Physical) Ult2
   m_EditorClassIdentifier: 
   EnergyGeneration: 20
-  AbilityType: 3
+  AbilityTypes: 
   Targets: 1
   MainEffect: 5
   ScalingStat: 2
   ScalingPer: 180
   ScalingPerReductionForNonMainTargets: 40
   FlatAmount: 0
+  WeaknessBreak: 30
+  ExtraWeaknessBreakForMainTarget: 0
   ApplyEffectToTarget: {fileID: 0}
-  Passive:
-    Trigger: 
-    Condition: 
-    TargetNeedsEffects: []
-    excludeIfEffect: 0
-    StatCondition: 0
-    AboveOrBelow: 0
-    FlatAmount: 0
-    PerAmount: 0
-    UseAnd: 0
-    target: 0
-    effect: {fileID: 0}
-    effectStackCountInflicted: 1
+  TriggerThisAbility: []
+  EndTurn: 0
+  Skillpoints: 0
+  ChangeAbilityWhenThisEffect: {fileID: 0}
+  ChangeAbilityToThis: []
   EnergyCost: 120

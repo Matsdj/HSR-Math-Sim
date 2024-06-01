@@ -160,6 +160,15 @@ public class RuntimeCharacter : RuntimeStats
             }
             else Add(key, new RuntimeEffect(effect, cause, _character, Remove));
         }
+
+        public RuntimeEffect HasEffect(Effect effect)
+        {
+            foreach(KeyValuePair<KeyValuePair<Effect, int>, RuntimeEffect> runtime in this)
+            {
+                if (runtime.Key.Key == effect) return runtime.Value;
+            }
+            return null;
+        }
     }
 
     public class RuntimeShields : Dictionary<RuntimeEffect, float>

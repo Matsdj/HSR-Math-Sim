@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Trailblazer (Physical) Basic
   m_EditorClassIdentifier: 
   EnergyGeneration: 20
-  AbilityType: 1
+  AbilityTypes: 
   Targets: 0
   MainEffect: 5
   ScalingStat: 2
@@ -23,3 +23,8 @@ MonoBehaviour:
   WeaknessBreak: 30
   ExtraWeaknessBreakForMainTarget: 0
   ApplyEffectToTarget: {fileID: 0}
+  TriggerThisAbility: []
+  EndTurn: 1
+  Skillpoints: 0
+  ChangeAbilityWhenThisEffect: {fileID: 0}
+  ChangeAbilityToThis: []

@@ -197,7 +197,6 @@ public class Combat : MonoBehaviour
         if (AbilityLogic(character, character.BasedOfCharacter.Basic, _target))
         {
             character.Team.SkillPoints++;
-            DoTurn(character);
         }
     }
 
@@ -207,7 +206,6 @@ public class Combat : MonoBehaviour
         if (character.Team.SkillPoints > 0 && AbilityLogic(character, character.BasedOfCharacter.Skill, _target))
         {
             character.Team.SkillPoints--;
-            DoTurn(character);
         }
     }
 
@@ -233,6 +231,24 @@ public class Combat : MonoBehaviour
 
     public bool AbilityLogic(RuntimeCharacter character, Ability ability, RuntimeCharacter target)
     {
+        //Change Ability depending on effect
+        if (ability.ChangeAbilityWhenThisEffect != null)
+        {
+            RuntimeEffect effect = character.Effects.HasEffect(ability.ChangeAbilityWhenThisEffect);
+            if (effect != null)
+            {
+                int i = effect.StackCount - 1;
+                return AbilityLogic(character, ability.ChangeAbilityToThis[i], target);
+            }
+        }
+        //Skill Points
+        if (ability.Skillpoints < 0)
+        {
+            if (character.Team.SkillPoints >= -ability.Skillpoints) character.Team.SkillPoints += ability.Skillpoints;
+            else return false;
+        }
+        if (ability.Skillpoints > 0) character.Team.SkillPoints += ability.Skillpoints;
+        //Targets
         TargetCharacters targets = new TargetCharacters(character, ability.Targets, target, character);
         if (targets.Count == 0) return false;
         //Before triggers
@@ -247,7 +263,7 @@ public class Combat : MonoBehaviour
         WeaknessBreak(targets, ability.WeaknessBreak, ability.ExtraWeaknessBreakForMainTarget);
         Effect(targets, ability.ApplyEffectToTarget);
         //Trigger Abilities
-        foreach(Ability TriggeredAbility in ability.TriggerThisAbility)
+        foreach (Ability TriggeredAbility in ability.TriggerThisAbility)
         {
             AbilityLogic(character, TriggeredAbility, target);
         }
@@ -256,6 +272,7 @@ public class Combat : MonoBehaviour
         if (ability.IsOfType(AbilityType.Skill)) character.Invoke(Triggers.AfterSkill);
         if (ability.IsOfType(AbilityType.Ultimate)) character.Invoke(Triggers.AfterUlt);
 
+        if (ability.EndTurn && _actionOrder[0] == character) DoTurn(character);
         return true;
     }
 
