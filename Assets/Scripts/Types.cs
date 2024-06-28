@@ -25,6 +25,10 @@ namespace Types
         Toughness,
         LVLMultiplier,
         MaxToughnessMultiplier,
+        Weaken,
+        DEF_PEN,
+        Vulnerability,
+        DMGReduction
     }
 
     public enum OtherEffects
@@ -60,7 +64,7 @@ namespace Types
         Talent,
         Technique,
         FollowUp,
-        Effect
+        Effect //This includes DOT
     }
 
     public enum Targets

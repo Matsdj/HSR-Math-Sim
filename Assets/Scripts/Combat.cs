@@ -259,7 +259,7 @@ public class Combat : MonoBehaviour
         character.Energy += ability.EnergyGeneration;
         float amount = BaseAmount(ability.ScalingPer, 0, character.GetStat(ability.ScalingStat), ability.FlatAmount);
         AddTurnInfo($"{ability.name}");
-        MainEffect(character, ability.MainEffect, targets, amount);
+        MainEffect(character, ability.MainEffect, ability.AbilityTypes, targets, amount);
         WeaknessBreak(targets, ability.WeaknessBreak, ability.ExtraWeaknessBreakForMainTarget);
         Effect(targets, ability.ApplyEffectToTarget);
         //Trigger Abilities
@@ -275,8 +275,15 @@ public class Combat : MonoBehaviour
         if (ability.EndTurn && _actionOrder[0] == character) DoTurn(character);
         return true;
     }
-
-    public void MainEffect(RuntimeCharacter cause, OtherEffects effect, List<RuntimeCharacter> targets, float amount, RuntimeEffect cause2 = null)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="cause"></param>
+    /// <param name="effect"></param>
+    /// <param name="targets"></param>
+    /// <param name="amount"></param>
+    /// <param name="cause2">This is needed for shields to make sure the effect is removed when the shield hits 0</param>
+    public void MainEffect(RuntimeCharacter cause, OtherEffects effect, AbilityType[] abilityTypes, List<RuntimeCharacter> targets, float amount, RuntimeEffect cause2 = null)
     {
         switch (effect)
         {
@@ -315,7 +322,7 @@ public class Combat : MonoBehaviour
                 foreach (RuntimeCharacter target in targets) target.Invoke(Triggers.BeforeTakingDamage, cause);
                 foreach (RuntimeCharacter target in targets)
                 {
-                    DoDamage(cause, target, amount, true);
+                    DoDamage(cause, target, amount, true, abilityTypes);
                     target.Invoke(Triggers.AfterTakingDamage, cause);
                 }
                 break;
@@ -328,16 +335,17 @@ public class Combat : MonoBehaviour
         AddTurnInfo(targetsInfo);
     }
 
-    public void DoDamage(RuntimeCharacter cause, RuntimeCharacter receiver, float baseDMG, bool canCrit)
+    public void DoDamage(RuntimeCharacter cause, RuntimeCharacter receiver, float baseDMG, bool canCrit, AbilityType[] abilityTypes)
     {
+        Element element = cause.BasedOfCharacter.element;
         float crit = canCrit ? Crit(cause.Adv.CRIT_Rate / 100, cause.Adv.CRIT_DMG / 100) : 1;
-        float dmg = DMGMultiplier(0); //TODO
-        float weaken = WeakenMultiplier(0); //TODO
-        float def = DEFMultiplier(cause.LVL, receiver.Base.DEF, 0, 0); //TODO
-        float res = RESMultiplier(0, 0); //TODO
-        float vulnerability = VulnerabilityMultiplier(0); //TODO
-        float dmgReduction = DMGReductionMultiplier(new List<float>()); //TODO
-        float broken = BrokenMultiplier(false); //TODO
+        float dmg = (abilityTypes.Length == 0) ? 1: DMGMultiplier(cause.Adv.ElementDMG.Get(element) + cause.Adv.AbilityDMG.Get(abilityTypes));
+        float weaken = WeakenMultiplier(cause.Adv.Weaken);
+        float def = DEFMultiplier(cause.LVL, receiver.Base.DEF, receiver.Per.DEF, cause.Adv.DEF_PEN, receiver.Flat.DEF);
+        float res = RESMultiplier(receiver.Adv.ElementRES.Get(element), cause.Adv.RES_PEN.Get(element));
+        float vulnerability = VulnerabilityMultiplier(receiver.Adv.Vulnerability);
+        float dmgReduction = DMGReductionMultiplier(cause.Adv.DMGReduction);
+        float broken = BrokenMultiplier(receiver.IsWeaknessBroken);
         float total = baseDMG * crit * dmg * weaken * def * res * vulnerability * dmgReduction * broken;
         float excess = receiver.DoDamageToShield(total);
         receiver.CurrentHP -= excess;
@@ -376,6 +384,8 @@ public class Combat : MonoBehaviour
             target.ActionAdvanceForward(-0.25f);
             float MaxToughnessMultiplier = 0.5f + target.BasedOfCharacter.advancedStats.Toughness / 120;
             float baseDMG = MaxToughnessMultiplier * cause.GetStat(Stats.LVLMultiplier) * cause.Adv.BreakEffect / 100;
+
+            AbilityType[] abilityTypes = new AbilityType[] { };
             switch (cause.BasedOfCharacter.element)
             {
                 case Element.None:
@@ -383,33 +393,33 @@ public class Combat : MonoBehaviour
                 case Element.All:
                     break;
                 case Element.Physical:
-                    DoDamage(cause, target, 2 * baseDMG, false);
+                    DoDamage(cause, target, 2 * baseDMG, false, abilityTypes);
                     Effect(target, cause, BreakEffects[0]);
                     break;
                 case Element.Fire:
-                    DoDamage(cause, target, 2 * baseDMG, false);
+                    DoDamage(cause, target, 2 * baseDMG, false, abilityTypes);
                     Effect(target, cause, BreakEffects[1]);
                     break;
                 case Element.Ice:
-                    DoDamage(cause, target, 1 * baseDMG, false);
+                    DoDamage(cause, target, 1 * baseDMG, false, abilityTypes);
                     Effect(target, cause, BreakEffects[2]);
                     break;
                 case Element.Lightning:
-                    DoDamage(cause, target, 1 * baseDMG, false);
+                    DoDamage(cause, target, 1 * baseDMG, false, abilityTypes);
                     Effect(target, cause, BreakEffects[3]);
                     break;
                 case Element.Wind:
-                    DoDamage(cause, target, 1.5f * baseDMG, false);
+                    DoDamage(cause, target, 1.5f * baseDMG, false, abilityTypes);
                     Effect(target, cause, BreakEffects[4]);
                     Effect(target, cause, BreakEffects[4]);
                     Effect(target, cause, BreakEffects[4]);
                     break;
                 case Element.Quantum:
-                    DoDamage(cause, target, .5f * baseDMG, false);
+                    DoDamage(cause, target, .5f * baseDMG, false, abilityTypes);
                     Effect(target, cause, BreakEffects[5]);
                     break;
                 case Element.Imaginary:
-                    DoDamage(cause, target, .5f * baseDMG, false);
+                    DoDamage(cause, target, .5f * baseDMG, false, abilityTypes);
                     Effect(target, cause, BreakEffects[6]);
                     break;
                 default:

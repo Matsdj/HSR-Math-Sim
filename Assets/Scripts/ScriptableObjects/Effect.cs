@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Types;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 [CreateAssetMenu(fileName = "Effect", menuName = "ScriptableObjects/Effect", order = 4)]
 public class Effect : ScriptableObject
@@ -28,8 +29,12 @@ public class Effect : ScriptableObject
 public class Buff
 {
     public Stats StatToBuff;
+    public Element DMG_ElementType;
+    public AbilityType DMG_AbilityType;
+    public Element RES_PEN_ElementType;
+    public Element RES_ElementType;
     public float FlatIncrease;
-    public float PerIncrease;
+    public float PerIncrease; //Basicly only applicable to Basic stats. Percentage increase works the same as flat for advanced stats like CRIT
 }
 
 [Serializable]
@@ -43,7 +48,9 @@ public class OtherWithTrigger
 public class OtherEffect
 {
     public OtherEffects Effect; //Only works if StatToBuff is none
-    public Element DMG_Type; //Only applies if OtherEffect is Deal DMG
+    /// <summary>This is currently unused. It always uses the character element instead</summary>
+    [Tooltip("This is currently unused. It always uses the character element instead")]
+    public Element DMG_Type;
 
     public float FlatIncrease; //Amount of flat Statbuff or DMG
     public float Multiplier;
@@ -139,18 +146,32 @@ public class RuntimeEffect
     {
         foreach (Buff buff in Base.Buffs)
         {
+            float flat = buff.FlatIncrease;
+            float per = buff.PerIncrease;
             //Statbuff
             if (buff.StatToBuff != Stats.None)
             {
-                float flat = buff.FlatIncrease;
-                float per = buff.PerIncrease;
-                if (removeInstead) { flat *= -1; per *= -1; }
-                if (Base.StackCountMultipliesEffect) { flat *= StackCount; per *= StackCount; }
+                if (buff.StatToBuff == Stats.DMGReduction && flat > 0)
+                {
+                    if (removeInstead) _target.Adv.DMGReduction.Remove(flat);
+                    else _target.Adv.DMGReduction.Add(flat);
+                }
+                else
+                {
+                    if (removeInstead) { flat *= -1; per *= -1; }
+                    if (Base.StackCountMultipliesEffect) { flat *= StackCount; per *= StackCount; }
 
-                if (buff.FlatIncrease != 0) _target.GetStatReference(buff.StatToBuff, _target.Flat) += flat;
-                if (buff.PerIncrease != 0) _target.GetStatReference(buff.StatToBuff, _target.Per) += per;
-                _target.CalculateAllFinalStats(buff.StatToBuff, false);
+                    if (buff.FlatIncrease != 0) _target.GetStatReference(buff.StatToBuff, _target.Flat, _target.Adv) += flat;
+                    if (buff.PerIncrease != 0) _target.GetStatReference(buff.StatToBuff, _target.Per, _target.Adv) += per;
+                    _target.CalculateAllFinalStats(buff.StatToBuff, false);
+                }
             }
+            if (removeInstead) { flat *= -1; }
+            _target.Adv.ElementDMG.Add(buff.DMG_ElementType, flat);
+            _target.Adv.AbilityDMG.Add(buff.DMG_AbilityType, flat);
+            _target.Adv.RES_PEN.Add(buff.RES_PEN_ElementType, flat);
+            _target.Adv.ElementRES.Add(buff.RES_ElementType, flat);
+
         }
     }
 
@@ -209,7 +230,7 @@ public class RuntimeEffect
             _base = @base;
             _parent = parent;
 
-            foreach(Triggers trigger in @base.Triggers)
+            foreach (Triggers trigger in @base.Triggers)
             {
                 if (trigger == Triggers.Immediate) DoOtherEffect();
                 else parent._target.Events[trigger].Add(DoOtherEffect);
@@ -222,7 +243,7 @@ public class RuntimeEffect
             {
                 float amount = effect.Amount(_parent._cause, _parent._target);
                 if (_parent.Base.StackCountMultipliesEffect) amount *= _parent.StackCount;
-                Combat.instance.MainEffect(_parent._cause, effect.Effect, new List<RuntimeCharacter>() { _parent._target }, amount, _parent);
+                Combat.instance.MainEffect(_parent._cause, effect.Effect, new AbilityType[] { AbilityType.Effect }, new List<RuntimeCharacter>() { _parent._target }, amount, _parent);
             }
 
             if (_parent.Base.LoseStackOnTrigger)
