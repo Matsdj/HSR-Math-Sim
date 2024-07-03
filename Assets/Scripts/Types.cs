@@ -67,17 +67,23 @@ namespace Types
         Effect //This includes DOT
     }
 
+    public enum ValidTeam
+    {
+        None,
+        All,
+        Ally,
+        Enemy
+    }
+
     public enum Targets
     {
-        EnemySingle,
-        EnemyArea,
-        EnemyAll,
-        EnemyRandom,
+        Single,
+        Blast,
+        AOE,
         Self,
-        AllySingle,
-        AllyOthers, //Excluding cause
-        AllyArea,
-        AllyAll,
+        Others, //Excluding the source
+        Random,
+        RandomAdjacent,
     }
 
     public enum Path

@@ -110,6 +110,8 @@ public class RuntimeEffect
     public event RuntimeCharacter.SimpleFunc OnRemove;
     private List<RuntimeOtherEffect> _otherEffects;
 
+    public RuntimeCharacter Cause { get => _cause; }
+
     public RuntimeEffect(Effect @base, RuntimeCharacter cause, RuntimeCharacter target, Func<KeyValuePair<Effect, int>, bool> removeSelfAction)
     {
         Base = @base;
@@ -243,7 +245,7 @@ public class RuntimeEffect
             {
                 float amount = effect.Amount(_parent._cause, _parent._target);
                 if (_parent.Base.StackCountMultipliesEffect) amount *= _parent.StackCount;
-                Combat.instance.MainEffect(_parent._cause, effect.Effect, new AbilityType[] { AbilityType.Effect }, new List<RuntimeCharacter>() { _parent._target }, amount, _parent);
+                Combat.instance.MainEffect(_parent, effect, new Combat.TargetCharacters(_parent.Cause, _parent._target, Targets.Single), amount, 0);
             }
 
             if (_parent.Base.LoseStackOnTrigger)

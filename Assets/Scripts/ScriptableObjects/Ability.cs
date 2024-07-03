@@ -10,24 +10,32 @@ public class Ability : ScriptableObject
     public int EnergyGeneration = 20;
     public AbilityType[] AbilityTypes;
     public Targets Targets;
+    public ValidTeam ValidTeamToTarget;
     public OtherEffects MainEffect;
     public Stats ScalingStat;
     public float ScalingPer;
-    public float ScalingPerReductionForNonMainTargets;
+    public float ScalingPerForNonMainTargets; //Not used if 0
     public float FlatAmount;
     public float WeaknessBreak = 30;
-    public float ExtraWeaknessBreakForMainTarget;
+    public float WeaknessBreakForNonMainTargets; //Not used if 0
     public Effect ApplyEffectToTarget;
     public Ability[] TriggerThisAbility;
     [Tooltip("This also applies to talent, technique and ult, but it doesn't end turn if it isn't your turn.")]
     public bool EndTurn = true;
     [Tooltip("Basic = 1, Skill = -1. This also applies to talent, technique and ult. The ability will cancel if you don't have enough when it is a negative value")]
     public int Skillpoints = 0;
+    public MultiHit[] MultiHits;
     public Effect ChangeAbilityWhenThisEffect;
     [Tooltip("First ability in the list is at 1 stack second is at 2 stacks etc.")]
     public Ability[] ChangeAbilityToThis;
     public bool IsOfType(AbilityType type)
     {
         return AbilityTypes.Contains(type);
+    }
+
+    public class MultiHit {
+        public Targets Target;
+        public float PerOfDMG;
+        public float PerOfToughnessDMG;
     }
 }
