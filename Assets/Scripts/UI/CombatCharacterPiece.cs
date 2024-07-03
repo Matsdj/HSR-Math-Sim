@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static Combat;
 
 public class CombatCharacterPiece : CharacterGridPiece, IPointerClickHandler
 {
@@ -12,14 +13,14 @@ public class CombatCharacterPiece : CharacterGridPiece, IPointerClickHandler
     public RectTransform ToughnessBar;
     public Button UltButton;
     public Button UltButton2;
-    private RuntimeCharacter _RuntimeCharacter;
-    private UnityEvent<RuntimeCharacter, CombatCharacterPiece> _RuntimeCharacterEvent;
+    private RuntimeCharacter _runtimeCharacter;
+    private UnityEvent<RuntimeCharacter, CombatCharacterPiece> _runtimeCharacterEvent;
     private Combat _combat;
 
     protected override void Setup(Character c)
     {
         base.Setup(c);
-        _RuntimeCharacterEvent = new UnityEvent<RuntimeCharacter, CombatCharacterPiece>();
+        _runtimeCharacterEvent = new UnityEvent<RuntimeCharacter, CombatCharacterPiece>();
         UltButton.gameObject.SetActive(false);
         UltButton2.gameObject.SetActive(false);
     }
@@ -27,62 +28,71 @@ public class CombatCharacterPiece : CharacterGridPiece, IPointerClickHandler
     public void Apply(Character c, RuntimeCharacter RuntimeCharacter, Combat combat)
     {
         Setup(c);
-        _RuntimeCharacter = RuntimeCharacter;
-        _RuntimeCharacter.Events[Triggers.AfterTakingDamage].Add(UpdateHealthBar);
-        _RuntimeCharacter.Events[Triggers.AfterTakingDamage].Add(UpdateToughnessBar);
-        _RuntimeCharacter.Events[Triggers.EnergyChange].Add(ShowUltButton);
-        _RuntimeCharacter.Events[Triggers.OnDeath].Add(DestroySelf);
+        _runtimeCharacter = RuntimeCharacter;
+        _runtimeCharacter.Team.EnemyTeam.Events[Triggers.AfterDealingDamage].Add(UpdateHealthBar);
+        _runtimeCharacter.Team.EnemyTeam.Events[Triggers.AfterDealingDamage].Add(UpdateToughnessBar);
+        _runtimeCharacter.Team.Events[Triggers.ChargingEnergy].Add(ShowUltButton);
+        _runtimeCharacter.Events[Triggers.OnDeath].Add(DestroySelf);
         _combat = combat;
 
     }
 
     public void AddOnCharacterClickListener(UnityAction<RuntimeCharacter, CombatCharacterPiece> onCharacterClick)
     {
-        _RuntimeCharacterEvent.AddListener(onCharacterClick);
+        _runtimeCharacterEvent.AddListener(onCharacterClick);
     }
 
-    private void UpdateHealthBar(RuntimeCharacter reciever, RuntimeCharacter cause)
+    private void UpdateHealthBar(TargetCharacters targets)
     {
-        float x = reciever.CurrentHP / reciever.Final.HP;
-        HealthBar.localScale = new Vector3(Mathf.Clamp(x, 0, 1), 1, 1);
+        if (targets.Contains(_runtimeCharacter))
+        {
+            float x = _runtimeCharacter.CurrentHP / _runtimeCharacter.Final.HP;
+            HealthBar.localScale = new Vector3(Mathf.Clamp(x, 0, 1), 1, 1);
+        }
     }
 
-    private void UpdateToughnessBar(RuntimeCharacter reciever, RuntimeCharacter cause)
+    private void UpdateToughnessBar(TargetCharacters targets)
     {
-        float x = reciever.Adv.Toughness / reciever.AdvancedStats.Toughness;
-        ToughnessBar.localScale = new Vector3(Mathf.Clamp(x, 0, 1), 1, 1);
+        if (targets.Contains(_runtimeCharacter))
+        {
+            float x = _runtimeCharacter.Adv.Toughness / _runtimeCharacter.AdvancedStats.Toughness;
+            ToughnessBar.localScale = new Vector3(Mathf.Clamp(x, 0, 1), 1, 1);
+        }
     }
 
-    private void ShowUltButton(RuntimeCharacter reciever, RuntimeCharacter cause)
+    private void ShowUltButton(TargetCharacters targets)
     {
-        bool active = reciever.Energy >= reciever.Adv.MaxEnergy;
-        Debug.Log($"Energy:{reciever.Energy}, Max:{reciever.Adv.MaxEnergy}, ShowUltButton:{active}");
-        UltButton.gameObject.SetActive(active);
-        if (_RuntimeCharacter.BasedOfCharacter.Ultimate is DualUlt) UltButton2.gameObject.SetActive(active);
+        if (targets.Contains(_runtimeCharacter))
+        {
+            bool active = _runtimeCharacter.Energy >= _runtimeCharacter.Adv.MaxEnergy;
+            //Debug.Log($"Energy:{_runtimeCharacter.Energy}, Max:{_runtimeCharacter.Adv.MaxEnergy}, ShowUltButton:{active}");
+            UltButton.gameObject.SetActive(active);
+            if (_runtimeCharacter.BasedOfCharacter.Ultimate is DualUlt) UltButton2.gameObject.SetActive(active);
+        }
     }
 
     public override void OnClick()
     {
-        _RuntimeCharacterEvent.Invoke(_RuntimeCharacter, this);
+        _runtimeCharacterEvent.Invoke(_runtimeCharacter, this);
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Right)
-            _combat.Info.ChangeInfoSource(_RuntimeCharacter.CharacterInfo);
+            _combat.Info.ChangeInfoSource(_runtimeCharacter.CharacterInfo);
     }
 
     public void OnClickUlt()
     {
-        _combat.Ult(_RuntimeCharacter);
+        _combat.Ult(_runtimeCharacter);
     }
 
     public void OnClickUlt2()
     {
-        _combat.Ult2(_RuntimeCharacter);
+        _combat.Ult2(_runtimeCharacter);
     }
 
-    public void DestroySelf(RuntimeCharacter receiver, RuntimeCharacter cause)
+    public void DestroySelf(TargetCharacters targets = null)
     {
         Destroy(this);
     }

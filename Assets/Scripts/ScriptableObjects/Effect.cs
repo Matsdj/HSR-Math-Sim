@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Types;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
+using static Combat;
 
 [CreateAssetMenu(fileName = "Effect", menuName = "ScriptableObjects/Effect", order = 4)]
 public class Effect : ScriptableObject
@@ -177,7 +177,7 @@ public class RuntimeEffect
         }
     }
 
-    private void DurationCountDown(RuntimeCharacter receiver = null, RuntimeCharacter cause = null)
+    private void DurationCountDown(TargetCharacters targets = null)
     {
         Debug.Log($"Count down effect {Base.name}");
         _duration--;
@@ -239,7 +239,7 @@ public class RuntimeEffect
             }
         }
 
-        private void DoOtherEffect(RuntimeCharacter receiver = null, RuntimeCharacter cause = null)
+        private void DoOtherEffect(TargetCharacters targets = null)
         {
             foreach (OtherEffect effect in _base.Other)
             {

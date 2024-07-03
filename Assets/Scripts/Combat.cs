@@ -1,13 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Types;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 using static Ability;
-using static Combat.CharacterAction;
 using static MathFormulas;
 using static UnityEngine.GraphicsBuffer;
 
@@ -67,7 +64,7 @@ public class Combat : MonoBehaviour
         {
             AddCharacter(character, EnemyUI, 1);
         }
-        foreach (RuntimeCharacter character in _actionOrder) character.Invoke(Triggers.StartOfCombat, character);
+        foreach (RuntimeCharacter character in _actionOrder) character.Invoke(Triggers.StartOfCombat);
         SortActionOrder();
         _actionOrder[0].Invoke(Triggers.OnTurnStart);
         _actionHistory[0].Setup(_actionOrder[0], 0);
@@ -297,9 +294,9 @@ public class Combat : MonoBehaviour
                 {
                     float heal = targets.Amount(target, amount, adjacentAmount);
                     target.CurrentHP += heal;
-                    target.Invoke(Triggers.Heal, cause);
                     AddTurnInfo($"Heal:{heal}");
                 }
+                cause.Invoke(Triggers.Heal, targets);
                 break;
             case OtherEffects.Shield:
                 foreach (RuntimeCharacter target in targets)
@@ -333,7 +330,7 @@ public class Combat : MonoBehaviour
                 }
                 break;
             case OtherEffects.DealDMG:
-                foreach (RuntimeCharacter target in targets) target.Invoke(Triggers.BeforeTakingDamage, cause);
+                foreach (RuntimeCharacter target in targets) target.Invoke(Triggers.BeforeDealingDamage);
                 if (ability != null) DoMultihitDamage(cause, targets, ability, amount, adjacentAmount, abilitytypes);
                 else DoDamage(cause, targets.Main, amount, false, abilitytypes);
                 break;
@@ -386,7 +383,7 @@ public class Combat : MonoBehaviour
 
     public void DoDamage(RuntimeCharacter cause, RuntimeCharacter receiver, float baseDMG, bool canCrit, AbilityType[] abilityTypes)
     {
-        receiver.Invoke(Triggers.AfterTakingDamage, cause);
+        cause.Invoke(Triggers.AfterDealingDamage, receiver);
         Element element = cause.BasedOfCharacter.element;
         float crit = canCrit ? Crit(cause.Adv.CRIT_Rate / 100, cause.Adv.CRIT_DMG / 100) : 1;
         float dmg = (abilityTypes.Length == 0) ? 1 : DMGMultiplier(cause.Adv.ElementDMG.Get(element) + cause.Adv.AbilityDMG.Get(abilityTypes));
@@ -399,7 +396,7 @@ public class Combat : MonoBehaviour
         float total = baseDMG * crit * dmg * weaken * def * res * vulnerability * dmgReduction * broken;
         float excess = receiver.DoDamageToShield(total);
         receiver.CurrentHP -= excess;
-        AddTurnInfo($"Total DMG:{total}");
+        AddTurnInfo($"DMG:{total}");
     }
 
     public static void Effect(TargetCharacters targets, Effect effect)
@@ -489,7 +486,7 @@ public class Combat : MonoBehaviour
         public RuntimeCharacter Main;
         public RuntimeCharacter Cause;
 
-        public TargetCharacters(RuntimeCharacter cause, RuntimeCharacter target, Targets targetType, ValidTeam validTeam = ValidTeam.All) : base()
+        public TargetCharacters(RuntimeCharacter cause, RuntimeCharacter target, Targets targetType = Targets.Single, ValidTeam validTeam = ValidTeam.All) : base()
         {
             if (target == null) return;
             if (validTeam == ValidTeam.Enemy && target.Team.Id != cause.Team.EnemyTeam.Id) return;
@@ -600,13 +597,13 @@ public class Combat : MonoBehaviour
                 Add(trigger, new CharacterAction());
             }
         }
-        public void Invoke(Triggers trigger, RuntimeCharacter receiver, RuntimeCharacter cause)
+        public void Invoke(Triggers trigger, TargetCharacters targets)
         {
-            this[trigger].Invoke(receiver, cause);
+            this[trigger].Invoke(targets);
         }
     }
 
-    public class CharacterAction : List<Action<RuntimeCharacter, RuntimeCharacter>>
+    public class CharacterAction : List<Action<TargetCharacters>>
     {
         public List<CharacterMechanicOnTrigger> Mechanics;
         public new int Count { get => base.Count + Mechanics.Count; }
@@ -623,15 +620,15 @@ public class Combat : MonoBehaviour
             if (removeFunction != null) removeFunction += characterMechanicOnTrigger.RemoveFromList;
         }
 
-        public void Invoke(RuntimeCharacter receiver, RuntimeCharacter cause)
+        public void Invoke(TargetCharacters targets)
         {
-            foreach (Action<RuntimeCharacter, RuntimeCharacter> action in this)
+            foreach (Action<TargetCharacters> action in this)
             {
-                action.Invoke(receiver, cause);
+                action.Invoke(targets);
             }
             foreach (CharacterMechanicOnTrigger mechanic in Mechanics)
             {
-                mechanic.Invoke(receiver, cause);
+                mechanic.Invoke(targets);
             }
         }
 
@@ -648,10 +645,10 @@ public class Combat : MonoBehaviour
                 _list = list;
             }
 
-            public void Invoke(RuntimeCharacter receiver, RuntimeCharacter cause)
+            public void Invoke(TargetCharacters targets)
             {
-                bool correctCause = CorrectCause(cause);
-                if (correctCause) Effect(new TargetCharacters(_source, receiver, _mechanic.target), _mechanic.effect);
+                bool correctCause = CorrectCause(targets.Cause);
+                if (correctCause) Effect(new TargetCharacters(_source, targets.Main, _mechanic.target), _mechanic.effect);
                 AddTurnInfo($"[{_mechanic.effect.name} Applied:{correctCause}]");
             }
 

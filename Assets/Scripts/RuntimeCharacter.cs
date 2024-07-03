@@ -24,7 +24,7 @@ public class RuntimeCharacter : RuntimeStats
     private RuntimeEffects _effects;
     private float _turnPercentage;
 
-    public override float Energy { get => base.Energy; set { base.Energy = value; Invoke(Triggers.EnergyChange); } }
+    public override float Energy { get => base.Energy; set { base.Energy = value; Invoke(Triggers.ChargingEnergy); } }
     public string Name { get => BasedOfCharacter.name; }
 
     public float ActionValue { get => _actionValue; set { _actionValue = MathF.Max(instance.CurrentActionValue + .01f, value); instance.SortActionOrder(); } }
@@ -42,11 +42,11 @@ public class RuntimeCharacter : RuntimeStats
         _effects = new RuntimeEffects(this);
         Shields = new RuntimeShields();
         Id = id;
-        Events[Triggers.AfterTakingDamage].Add(AfterTakingDamage);
+        team.EnemyTeam.Events[Triggers.AfterAttack].Add(AfterEnemyAttack);
         Events[Triggers.OnTurnStart].Add(StartOfTurn);
     }
 
-    public void StartOfTurn(RuntimeCharacter receiver, RuntimeCharacter cause)
+    public void StartOfTurn(TargetCharacters targets = null)
     {
         if (Adv.Toughness <= 0)
         {
@@ -79,12 +79,17 @@ public class RuntimeCharacter : RuntimeStats
         ActionValue -= TurnCooldown * per;
     }
 
-    public void Invoke(Triggers trigger, RuntimeCharacter cause = null)
+    public void Invoke(Triggers trigger, TargetCharacters targets = null)
     {
-        if (cause == null) cause = this;
+        if (targets == null) targets = new TargetCharacters(this, this);
         if (Events[trigger].Mechanics.Count > 0) AddTurnInfo($"\n{Name}({Enum.GetName(typeof(Triggers), trigger)})");
-        Events.Invoke(trigger, this, cause);
-        Team.Events.Invoke(trigger, this, cause);
+        Events.Invoke(trigger, targets);
+        Team.Events.Invoke(trigger, targets);
+    }
+
+    public void Invoke(Triggers trigger, RuntimeCharacter target)
+    {
+        Invoke(trigger, new TargetCharacters(this, target));
     }
 
     public float DoDamageToShield(float amount)
@@ -105,11 +110,11 @@ public class RuntimeCharacter : RuntimeStats
         return excessDMG;
     }
 
-    public void AfterTakingDamage(RuntimeCharacter receiver, RuntimeCharacter cause)
+    public void AfterEnemyAttack(TargetCharacters targets)
     {
         if (CurrentHP <= 0)
         {
-            Events[Triggers.OnDeath].Invoke(receiver, cause);
+            Events[Triggers.OnDeath].Invoke(new TargetCharacters(targets.Cause, this));
             OnDeath.Invoke();
         }
     }
