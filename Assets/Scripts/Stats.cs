@@ -316,6 +316,7 @@ public class RuntimeStats
             case Stats.MissingHP: return Final.HP - CurrentHP;
             case Stats.Toughness: return Adv.Toughness;
             case Stats.LVLMultiplier: return LevelMultiplier[LVL - 1];
+            case Stats.MaxToughnessMultiplier: return 0.5f + (AdvancedStats.Toughness / 40);
         }
         Debug.LogError("Unimplemented Stat");
         return 0;
