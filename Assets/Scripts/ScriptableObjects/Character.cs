@@ -22,6 +22,7 @@ public class Character : ScriptableObject
     public Passive Talent;
     public Passive Technique;
 
+    public Effect[] Traces; //Essentially just effects that are applied ASAP
     public LightCone LightCone;
     public Relic[] Relics = new Relic[6];
 

@@ -44,6 +44,12 @@ public class RuntimeCharacter : RuntimeStats
         Id = id;
         team.EnemyTeam.Events[Triggers.AfterAttack].Add(AfterEnemyAttack);
         Events[Triggers.OnTurnStart].Add(StartOfTurn);
+
+        //Apply Traces
+        foreach(Effect effect in character.Traces)
+        {
+            _effects.Add(effect, this);
+        }
     }
 
     public void StartOfTurn(TargetCharacters targets = null)
